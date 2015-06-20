@@ -21,9 +21,9 @@ fkill(1337, function (err) {
 	console.log('Killed process');
 });
 
-fkill('safari');
+fkill('Safari');
 
-fkill([1337, 'safari']);
+fkill([1337, 'Safari']);
 ```
 
 
