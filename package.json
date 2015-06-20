@@ -1,0 +1,47 @@
+{
+  "name": "fkill",
+  "version": "0.0.0",
+  "description": "Force kill processes. Cross-platform.",
+  "license": "MIT",
+  "repository": "sindresorhus/fkill",
+  "author": {
+    "name": "Sindre Sorhus",
+    "email": "sindresorhus@gmail.com",
+    "url": "sindresorhus.com"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "scripts": {
+    "test": "node test.js"
+  },
+  "files": [
+    "index.js"
+  ],
+  "keywords": [
+    "fkill",
+    "kill",
+    "killing",
+    "killall",
+    "taskkill",
+    "sigkill",
+    "sigterm",
+    "force",
+    "exit",
+    "zap",
+    "die",
+    "force",
+    "ps",
+    "proc"
+  ],
+  "dependencies": {
+    "arrify": "^1.0.0",
+    "each-async": "^1.1.1",
+    "taskkill": "^1.0.0"
+  },
+  "devDependencies": {
+    "ava": "0.0.4",
+    "noop-process": "^2.0.0",
+    "process-exists": "^1.0.0"
+  }
+}
