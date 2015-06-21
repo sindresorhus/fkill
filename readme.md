@@ -49,7 +49,7 @@ One or more process IDs/names to kill.
 
 ## Related
 
-- [fkill-cli](https://github.com/) - CLI for this module
+- [fkill-cli](https://github.com/sindresorhus/fkill-cli) - CLI for this module
 
 
 ## License
