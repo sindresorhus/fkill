@@ -44,7 +44,8 @@ module.exports = function (input, opts, cb) {
 	eachAsync(input, function (input, i, done) {
 		fn(input, opts, function (err) {
 			if (err) {
-				errors.push(err.message);
+				errors.push('Killing process ' + input + ' failed: ' +
+					err.message.replace(/.*\n/, '').replace(/kill: \d+: /, '').trim());
 			}
 
 			done();
