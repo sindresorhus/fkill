@@ -11,7 +11,7 @@ test('pid', function (t) {
 	noopProcess(function (err, pid) {
 		t.assert(!err, err);
 
-		fkill(pid, function (err) {
+		fkill(pid, {force: true}, function (err) {
 			t.assert(!err, err);
 
 			processExists(pid, function (err, exists) {
