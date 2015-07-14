@@ -66,7 +66,7 @@ test('fail', function (t) {
 
 	fkill(['123456', '654321'], function (err) {
 		t.assert(err);
-		t.assert(/123456: no process found/.test(err.message));
-		t.assert(/654321: no process found/.test(err.message));
+		t.assert(/123456/.test(err.message));
+		t.assert(/654321/.test(err.message));
 	});
 });

@@ -9,9 +9,7 @@ function win(input, cb) {
 		force: true,
 		// don't kill ourselves
 		filter: 'PID ne ' + process.pid
-	}, function (err) {
-		cb(err);
-	});
+	}, cb);
 }
 
 function def(input, cb) {
@@ -33,15 +31,6 @@ module.exports = function (input, cb) {
 		return el !== process.pid;
 	});
 
-	function end(cb) {
-		if (errors.length > 0) {
-			cb(new Error(errors.join('\n')));
-			return;
-		}
-
-		cb();
-	}
-
 	eachAsync(input, function (input, i, done) {
 		fn(input, function (err) {
 			if (err) {
@@ -50,5 +39,12 @@ module.exports = function (input, cb) {
 
 			done();
 		});
-	}, end.bind(null, cb));
+	}, function () {
+		if (errors.length > 0) {
+			cb(new Error(errors.join('\n')));
+			return;
+		}
+
+		cb();
+	});
 };
