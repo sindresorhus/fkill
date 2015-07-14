@@ -6,7 +6,7 @@
 	<br>
 </h1>
 
-> Force kill processes. Cross-platform.
+> Fabulously kill processes. Cross-platform.
 
 [![Build Status](https://travis-ci.org/sindresorhus/fkill.svg?branch=master)](https://travis-ci.org/sindresorhus/fkill) [![Build status](https://ci.appveyor.com/api/projects/status/a8aqswbd578qj09i/branch/master?svg=true)](https://ci.appveyor.com/project/sindresorhus/fkill/branch/master)
 
@@ -37,7 +37,7 @@ fkill([1337, 'Safari']);
 
 ## API
 
-### fkill(input, [callback])
+### fkill(input, [options], [callback])
 
 #### input
 
@@ -45,6 +45,15 @@ fkill([1337, 'Safari']);
 Type: `number`, `string`, (`array` of `number` and `string`)
 
 One or more process IDs/names to kill.
+
+#### options
+
+##### force
+
+Type: `boolean`  
+Default: `false`
+
+Force kill the process.
 
 
 ## Related
