@@ -4,22 +4,17 @@ var eachAsync = require('each-async');
 var arrify = require('arrify');
 var taskkill = require('taskkill');
 
-function win(input, i, cb) {
+function win(input, cb) {
 	taskkill(input, {
 		force: true,
 		// don't kill ourselves
 		filter: 'PID ne ' + process.pid
 	}, function (err) {
-		if (err) {
-			cb(err);
-			return;
-		}
-
-		cb();
+		cb(err);
 	});
 }
 
-function def(input, i, cb) {
+function def(input, cb) {
 	var cmd = typeof input === 'string' ? 'killall' : 'kill';
 
 	childProcess.execFile(cmd, ['-9', input], function (err) {
@@ -29,6 +24,7 @@ function def(input, i, cb) {
 
 module.exports = function (input, cb) {
 	var fn = process.platform === 'win32' ? win : def;
+	var errors = [];
 
 	cb = cb || function () {};
 
@@ -37,5 +33,22 @@ module.exports = function (input, cb) {
 		return el !== process.pid;
 	});
 
-	eachAsync(input, fn, cb);
+	function end(cb) {
+		if (errors.length > 0) {
+			cb(new Error(errors.join('\n')));
+			return;
+		}
+
+		cb();
+	}
+
+	eachAsync(input, function (input, i, done) {
+		fn(input, function (err) {
+			if (err) {
+				errors.push(err.message);
+			}
+
+			done();
+		});
+	}, end.bind(null, cb));
 };
