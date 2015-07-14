@@ -17,7 +17,7 @@ function def(input, opts, cb) {
 	var args = [input];
 
 	if (opts.force) {
-		flags.unshift('-9');
+		args.unshift('-9');
 	}
 
 	childProcess.execFile(cmd, args, function (err) {
