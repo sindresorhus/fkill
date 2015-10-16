@@ -36,7 +36,8 @@
   ],
   "dependencies": {
     "arrify": "^1.0.0",
-    "each-async": "^1.1.1",
+    "pify": "^2.2.0",
+    "pinkie-promise": "^1.0.0",
     "taskkill": "^1.0.0"
   },
   "devDependencies": {

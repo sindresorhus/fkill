@@ -1,18 +1,19 @@
 'use strict';
 var childProcess = require('child_process');
-var eachAsync = require('each-async');
 var arrify = require('arrify');
 var taskkill = require('taskkill');
+var pify = require('pify');
+var Promise = require('pinkie-promise');
 
-function win(input, opts, cb) {
-	taskkill(input, {
+function win(input, opts) {
+	return pify(taskkill, Promise)(input, {
 		force: opts.force,
 		// don't kill ourselves
 		filter: 'PID ne ' + process.pid
-	}, cb);
+	});
 }
 
-function def(input, opts, cb) {
+function def(input, opts) {
 	var cmd = typeof input === 'string' ? 'killall' : 'kill';
 	var args = [input];
 
@@ -20,42 +21,28 @@ function def(input, opts, cb) {
 		args.unshift('-9');
 	}
 
-	childProcess.execFile(cmd, args, function (err) {
-		cb(err);
-	});
+	return pify(childProcess.execFile, Promise)(cmd, args);
 }
 
-module.exports = function (input, opts, cb) {
-	if (typeof opts !== 'object') {
-		cb = opts;
-		opts = {};
-	}
+module.exports = function (input, opts) {
+	opts = opts || {};
 
 	var fn = process.platform === 'win32' ? win : def;
 	var errors = [];
-
-	cb = cb || function () {};
 
 	// don't kill ourselves
 	input = arrify(input).filter(function (el) {
 		return el !== process.pid;
 	});
 
-	eachAsync(input, function (input, i, done) {
-		fn(input, opts, function (err) {
-			if (err) {
-				errors.push('Killing process ' + input + ' failed: ' +
-					err.message.replace(/.*\n/, '').replace(/kill: \d+: /, '').trim());
-			}
-
-			done();
+	return Promise.all(input.map(function (input) {
+		return fn(input, opts).catch(function (err) {
+			errors.push('Killing process ' + input + ' failed: ' +
+				err.message.replace(/.*\n/, '').replace(/kill: \d+: /, '').trim());
 		});
-	}, function () {
+	})).then(function () {
 		if (errors.length > 0) {
-			cb(new Error(errors.join('\n')));
-			return;
+			throw new Error(errors.join('\n'));
 		}
-
-		cb();
 	});
 };
