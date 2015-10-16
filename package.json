@@ -13,7 +13,7 @@
     "node": ">=0.10.0"
   },
   "scripts": {
-    "test": "ava"
+    "test": "xo && ava"
   },
   "files": [
     "index.js"
@@ -44,6 +44,12 @@
     "ava": "*",
     "noop-process": "^2.0.0",
     "pify": "^2.2.0",
-    "process-exists": "^2.0.0"
+    "process-exists": "^2.0.0",
+    "xo": "*"
+  },
+  "xo": {
+    "ignores": [
+      "test.js"
+    ]
   }
 }
