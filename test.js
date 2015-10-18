@@ -2,13 +2,10 @@ import childProcess from 'child_process';
 import test from 'ava';
 import noopProcess from 'noop-process';
 import processExists from 'process-exists';
-import pify from 'pify';
 import fn from './';
 
-const noopProcessP = pify(noopProcess);
-
 test('pid', async t => {
-	const pid = await noopProcessP();
+	const pid = await noopProcess();
 	await fn(pid, {force: true});
 	t.false(await processExists(pid));
 });
@@ -25,7 +22,7 @@ if (process.platform === 'win32') {
 } else {
 	test('title', async t => {
 		const title = 'fkill-test';
-		const pid = await noopProcessP({title: title});
+		const pid = await noopProcess({title: title});
 
 		await fn(title);
 

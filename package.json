@@ -42,8 +42,7 @@
   },
   "devDependencies": {
     "ava": "*",
-    "noop-process": "^2.0.0",
-    "pify": "^2.2.0",
+    "noop-process": "^3.0.0",
     "process-exists": "^2.0.0",
     "xo": "*"
   },
