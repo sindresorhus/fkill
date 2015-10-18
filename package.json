@@ -13,7 +13,7 @@
     "node": ">=0.10.0"
   },
   "scripts": {
-    "test": "node test.js"
+    "test": "xo && ava"
   },
   "files": [
     "index.js"
@@ -36,12 +36,20 @@
   ],
   "dependencies": {
     "arrify": "^1.0.0",
-    "each-async": "^1.1.1",
+    "pify": "^2.2.0",
+    "pinkie-promise": "^1.0.0",
     "taskkill": "^1.0.0"
   },
   "devDependencies": {
-    "ava": "0.0.4",
+    "ava": "*",
     "noop-process": "^2.0.0",
-    "process-exists": "^1.0.0"
+    "pify": "^2.2.0",
+    "process-exists": "^2.0.0",
+    "xo": "*"
+  },
+  "xo": {
+    "ignores": [
+      "test.js"
+    ]
   }
 }

@@ -1,72 +1,44 @@
-'use strict';
-var childProcess = require('child_process');
-var test = require('ava');
-var noopProcess = require('noop-process');
-var processExists = require('process-exists');
-var fkill = require('./');
+import childProcess from 'child_process';
+import test from 'ava';
+import noopProcess from 'noop-process';
+import processExists from 'process-exists';
+import pify from 'pify';
+import fn from './';
 
-test('pid', function (t) {
-	t.plan(4);
+const noopProcessP = pify(noopProcess);
 
-	noopProcess(function (err, pid) {
-		t.assert(!err, err);
-
-		fkill(pid, {force: true}, function (err) {
-			t.assert(!err, err);
-
-			processExists(pid, function (err, exists) {
-				t.assert(!err, err);
-				t.assert(!exists);
-			});
-		});
-	});
+test('pid', async t => {
+	const pid = await noopProcessP();
+	await fn(pid, {force: true});
+	t.false(await processExists(pid));
 });
 
 if (process.platform === 'win32') {
-	test('title', function (t) {
-		t.plan(3);
+	test('title', async t => {
+		const title = 'notepad.exe';
+		const pid = childProcess.spawn(title).pid;
 
-		var title = 'notepad.exe';
-		var pid = childProcess.spawn(title).pid;
+		await fn(title);
 
-		fkill(title, function (err) {
-			t.assert(!err, err);
+		t.false(await processExists(pid));
+	});
+} else {
+	test('title', async t => {
+		const title = 'fkill-test';
+		const pid = await noopProcessP({title: title});
 
-			processExists(pid, function (err, exists) {
-				t.assert(!err, err);
-				t.assert(!exists);
-			});
-		});
+		await fn(title);
+
+		t.false(await processExists(pid));
 	});
 
-	return;
+	test('fail', async t => {
+		try {
+			await fn(['123456', '654321']);
+			t.fail();
+		} catch (err) {
+			t.regexTest(/123456/, err.message);
+			t.regexTest(/654321/, err.message);
+		}
+	});
 }
-
-test('title', function (t) {
-	t.plan(4);
-
-	var title = 'fkill-test';
-
-	noopProcess({title: title}, function (err, pid) {
-		t.assert(!err, err);
-
-		fkill(title, function (err) {
-			t.assert(!err, err);
-
-			processExists(pid, function (err, exists) {
-				t.assert(!err, err);
-				t.assert(!exists);
-			});
-		});
-	});
-});
-
-test('fail', function (t) {
-	t.plan(3);
-
-	fkill(['123456', '654321'], function (err) {
-		t.assert(err);
-		t.assert(/123456/.test(err.message));
-		t.assert(/654321/.test(err.message));
-	});
-});

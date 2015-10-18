@@ -23,9 +23,9 @@ $ npm install --save fkill
 ## Usage
 
 ```js
-var fkill = require('fkill');
+const fkill = require('fkill');
 
-fkill(1337, function (err) {
+fkill(1337).then(() => {
 	console.log('Killed process');
 });
 
@@ -37,7 +37,9 @@ fkill([1337, 'Safari']);
 
 ## API
 
-### fkill(input, [options], [callback])
+### fkill(input, [options])
+
+Returns a promise.
 
 #### input
 
