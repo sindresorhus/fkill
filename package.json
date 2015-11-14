@@ -37,7 +37,7 @@
   "dependencies": {
     "arrify": "^1.0.0",
     "pify": "^2.2.0",
-    "pinkie-promise": "^1.0.0",
+    "pinkie-promise": "^2.0.0",
     "taskkill": "^1.0.0"
   },
   "devDependencies": {
