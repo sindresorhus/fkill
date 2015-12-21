@@ -45,10 +45,5 @@
     "noop-process": "^3.0.0",
     "process-exists": "^2.0.0",
     "xo": "*"
-  },
-  "xo": {
-    "ignores": [
-      "test.js"
-    ]
   }
 }
