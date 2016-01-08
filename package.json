@@ -10,7 +10,7 @@
     "url": "sindresorhus.com"
   },
   "engines": {
-    "node": ">=0.10.0"
+    "node": ">=4"
   },
   "scripts": {
     "test": "xo && ava"
@@ -37,7 +37,6 @@
   "dependencies": {
     "arrify": "^1.0.0",
     "execa": "^0.1.1",
-    "pinkie-promise": "^2.0.0",
     "taskkill": "^2.0.0"
   },
   "devDependencies": {
@@ -45,5 +44,8 @@
     "noop-process": "^3.0.0",
     "process-exists": "^2.0.0",
     "xo": "*"
+  },
+  "xo": {
+    "esnext:": true
   }
 }
