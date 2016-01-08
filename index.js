@@ -1,12 +1,11 @@
 'use strict';
-var childProcess = require('child_process');
 var arrify = require('arrify');
 var taskkill = require('taskkill');
-var pify = require('pify');
 var Promise = require('pinkie-promise');
+var execa = require('execa');
 
 function win(input, opts) {
-	return pify(taskkill, Promise)(input, {
+	return taskkill(input, {
 		force: opts.force,
 		// don't kill ourselves
 		filter: 'PID ne ' + process.pid
@@ -21,7 +20,7 @@ function def(input, opts) {
 		args.unshift('-9');
 	}
 
-	return pify(childProcess.execFile, Promise)(cmd, args);
+	return execa(cmd, args);
 }
 
 module.exports = function (input, opts) {

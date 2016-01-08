@@ -36,9 +36,9 @@
   ],
   "dependencies": {
     "arrify": "^1.0.0",
-    "pify": "^2.2.0",
+    "execa": "^0.1.1",
     "pinkie-promise": "^2.0.0",
-    "taskkill": "^1.0.0"
+    "taskkill": "^2.0.0"
   },
   "devDependencies": {
     "ava": "*",
