@@ -34,8 +34,8 @@ if (process.platform === 'win32') {
 			await fn(['123456', '654321']);
 			t.fail();
 		} catch (err) {
-			t.regexTest(/123456/, err.message);
-			t.regexTest(/654321/, err.message);
+			t.regex(err.message, /123456/);
+			t.regex(err.message, /654321/);
 		}
 	});
 }
