@@ -43,8 +43,7 @@ Returns a promise.
 
 #### input
 
-*Required*  
-Type: `number`, `string`, (`array` of `number` and `string`)
+Type: `number` `string` `Array<number|string>`
 
 One or more process IDs/names to kill.
 
@@ -52,7 +51,7 @@ One or more process IDs/names to kill.
 
 ##### force
 
-Type: `boolean`  
+Type: `boolean`<br>
 Default: `false`
 
 Force kill the process.
@@ -65,4 +64,4 @@ Force kill the process.
 
 ## License
 
-MIT © [Sindre Sorhus](http://sindresorhus.com)
+MIT © [Sindre Sorhus](https://sindresorhus.com)

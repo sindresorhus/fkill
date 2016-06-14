@@ -1,12 +1,13 @@
+/* eslint-disable ava/no-identical-title */
 import childProcess from 'child_process';
 import test from 'ava';
 import noopProcess from 'noop-process';
 import processExists from 'process-exists';
-import fn from './';
+import m from './';
 
 test('pid', async t => {
 	const pid = await noopProcess();
-	await fn(pid, {force: true});
+	await m(pid, {force: true});
 	t.false(await processExists(pid));
 });
 
@@ -15,7 +16,7 @@ if (process.platform === 'win32') {
 		const title = 'notepad.exe';
 		const pid = childProcess.spawn(title).pid;
 
-		await fn(title);
+		await m(title);
 
 		t.false(await processExists(pid));
 	});
@@ -24,14 +25,14 @@ if (process.platform === 'win32') {
 		const title = 'fkill-test';
 		const pid = await noopProcess({title: title});
 
-		await fn(title);
+		await m(title);
 
 		t.false(await processExists(pid));
 	});
 
 	test('fail', async t => {
 		try {
-			await fn(['123456', '654321']);
+			await m(['123456', '654321']);
 			t.fail();
 		} catch (err) {
 			t.regex(err.message, /123456/);
