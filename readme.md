@@ -10,7 +10,7 @@
 
 [![Build Status](https://travis-ci.org/sindresorhus/fkill.svg?branch=master)](https://travis-ci.org/sindresorhus/fkill) [![Build status](https://ci.appveyor.com/api/projects/status/a8aqswbd578qj09i/branch/master?svg=true)](https://ci.appveyor.com/project/sindresorhus/fkill/branch/master)
 
-Works on OS X, Linux, Windows.
+Works on macOS, Linux, Windows.
 
 
 ## Install
