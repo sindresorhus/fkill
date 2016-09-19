@@ -2,6 +2,7 @@
 const arrify = require('arrify');
 const taskkill = require('taskkill');
 const execa = require('execa');
+const AggregateError = require('aggregate-error');
 
 function win(input, opts) {
 	return taskkill(input, {
@@ -37,7 +38,7 @@ module.exports = (input, opts) => {
 		});
 	})).then(() => {
 		if (errors.length > 0) {
-			throw new Error(errors.join('\n'));
+			throw new AggregateError(errors);
 		}
 	});
 };
