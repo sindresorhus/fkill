@@ -35,6 +35,7 @@
     "proc"
   ],
   "dependencies": {
+    "aggregate-error": "^0.1.0",
     "arrify": "^1.0.0",
     "execa": "^0.2.1",
     "taskkill": "^2.0.0"
