@@ -60,6 +60,7 @@ Force kill the process.
 ## Related
 
 - [fkill-cli](https://github.com/sindresorhus/fkill-cli) - CLI for this module
+- [alfred-fkill](https://github.com/SamVerschueren/alfred-fkill) - Alfred workflow for this module
 
 
 ## License
