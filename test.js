@@ -23,7 +23,7 @@ if (process.platform === 'win32') {
 } else {
 	test('title', async t => {
 		const title = 'fkill-test';
-		const pid = await noopProcess({title: title});
+		const pid = await noopProcess({title});
 
 		await m(title);
 
