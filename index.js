@@ -28,12 +28,17 @@ function macOSKill(input, opts) {
 	return execa(cmd, args);
 }
 
-function def(input, opts) {
-	const cmd = typeof input === 'string' ? 'killall' : 'kill';
+function defaultKill(input, opts) {
+	const killByName = typeof input === 'string';
+	const cmd = killByName ? 'killall' : 'kill';
 	const args = [input];
 
 	if (opts.force) {
 		args.unshift('-9');
+	}
+
+	if (killByName && opts.ignoreCase) {
+		args.unshift('-I');
 	}
 
 	return execa(cmd, args);
@@ -49,7 +54,7 @@ module.exports = (input, opts) => {
 	} else if (process.platform === 'win32') {
 		fn = win;
 	} else {
-		fn = def;
+		fn = defaultKill;
 	}
 
 	// Don't kill ourselves
