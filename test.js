@@ -65,3 +65,10 @@ if (process.platform === 'win32') {
 		t.false(await processExists(pid));
 	});
 }
+
+test('ignore ignore-case for pid', async t => {
+	const pid = await noopProcess();
+	await m(pid, {force: true, ignoreCase: true});
+
+	t.false(await processExists(pid));
+});
