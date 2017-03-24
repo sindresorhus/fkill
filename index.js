@@ -7,7 +7,7 @@ const AggregateError = require('aggregate-error');
 function win(input, opts) {
 	return taskkill(input, {
 		force: opts.force,
-		// don't kill ourselves
+		// Don't kill ourselves
 		filter: `PID ne ${process.pid}`
 	});
 }
@@ -29,7 +29,7 @@ module.exports = (input, opts) => {
 	const fn = process.platform === 'win32' ? win : def;
 	const errors = [];
 
-	// don't kill ourselves
+	// Don't kill ourselves
 	input = arrify(input).filter(x => x !== process.pid);
 
 	return Promise.all(input.map(input => {
