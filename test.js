@@ -35,14 +35,14 @@ if (process.platform === 'win32') {
 		await delay(noopProcessExitDelay);
 		t.false(await processExists(pid));
 	});
-
-	test('fail', async t => {
-		try {
-			await m(['123456', '654321']);
-			t.fail();
-		} catch (err) {
-			t.regex(err.message, /123456/);
-			t.regex(err.message, /654321/);
-		}
-	});
 }
+
+test('fail', async t => {
+	try {
+		await m(['123456', '654321']);
+		t.fail();
+	} catch (err) {
+		t.regex(err.message, /123456/);
+		t.regex(err.message, /654321/);
+	}
+});
