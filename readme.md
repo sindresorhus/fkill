@@ -56,6 +56,13 @@ Default: `false`
 
 Force kill the process.
 
+##### ignoreCase
+
+Type: `boolean`<br>
+Default: `false`
+
+Ignore capitalization when killing a process.
+
 
 ## Related
 
