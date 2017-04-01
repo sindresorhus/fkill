@@ -3,11 +3,13 @@ import childProcess from 'child_process';
 import test from 'ava';
 import noopProcess from 'noop-process';
 import processExists from 'process-exists';
+import delay from 'delay';
 import m from './';
 
 test('pid', async t => {
 	const pid = await noopProcess();
 	await m(pid, {force: true});
+	await delay(10);
 	t.false(await processExists(pid));
 });
 
@@ -27,6 +29,7 @@ if (process.platform === 'win32') {
 
 		await m(title);
 
+		await delay(10);
 		t.false(await processExists(pid));
 	});
 
