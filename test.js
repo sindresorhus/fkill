@@ -46,3 +46,14 @@ test('fail', async t => {
 		t.regex(err.message, /654321/);
 	}
 });
+
+test.serial('don\'t kill self', async t => {
+	const originalFkillPid = process.pid;
+	const pid = await noopProcess();
+	Object.defineProperty(process, 'pid', {value: pid});
+
+	await m(process.pid);
+
+	t.true(await processExists(pid));
+	Object.defineProperty(process, 'pid', {value: originalFkillPid});
+});
