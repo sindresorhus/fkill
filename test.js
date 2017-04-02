@@ -6,14 +6,20 @@ import processExists from 'process-exists';
 import delay from 'delay';
 import m from './';
 
-// Ensure the noop process has time to exit
-const noopProcessExitDelay = 10;
+async function noopProcessExists(t, expectExists, pid) {
+	// Ensure the noop process has time to exit
+	await delay(10);
+	if (expectExists) {
+		return t.true(await processExists(pid));
+	}
+
+	return t.false(await processExists(pid));
+}
 
 test('pid', async t => {
 	const pid = await noopProcess();
 	await m(pid, {force: true});
-	await delay(noopProcessExitDelay);
-	t.false(await processExists(pid));
+	await noopProcessExists(t, false, pid);
 });
 
 if (process.platform === 'win32') {
@@ -41,8 +47,7 @@ if (process.platform === 'win32') {
 
 		await m(title);
 
-		await delay(noopProcessExitDelay);
-		t.false(await processExists(pid));
+		await noopProcessExists(t, false, pid);
 	});
 
 	test('fail', async t => {
@@ -62,8 +67,7 @@ if (process.platform === 'win32') {
 
 		await m('capitalized', {ignoreCase: true});
 
-		await delay(noopProcessExitDelay);
-		t.false(await processExists(pid));
+		noopProcessExists(t, false, pid);
 	});
 }
 
@@ -71,6 +75,5 @@ test('ignore ignore-case for pid', async t => {
 	const pid = await noopProcess();
 	await m(pid, {force: true, ignoreCase: true});
 
-	await delay(noopProcessExitDelay);
-	t.false(await processExists(pid));
+	noopProcessExists(t, false, pid);
 });
