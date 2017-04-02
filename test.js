@@ -54,6 +54,7 @@ test.serial('don\'t kill self', async t => {
 
 	await m(process.pid);
 
+	await delay(noopProcessExitDelay);
 	t.true(await processExists(pid));
 	Object.defineProperty(process, 'pid', {value: originalFkillPid});
 });
