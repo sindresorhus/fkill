@@ -31,15 +31,6 @@ if (process.platform === 'win32') {
 
 		t.false(await processExists(pid));
 	});
-
-	test('ignore case', async t => {
-		const title = 'Capitalized.exe';
-		const pid = childProcess.spawn(title).pid;
-
-		await m('capitalized.exe', {ignoreCase: true});
-
-		t.false(await processExists(pid));
-	});
 } else {
 	test('title', async t => {
 		const title = 'fkill-test';
@@ -59,17 +50,14 @@ if (process.platform === 'win32') {
 			t.regex(err.message, /654321/);
 		}
 	});
-
-	test('ignore case', async t => {
-		const pid = await noopProcess({
-			title: 'Capitalized'
-		});
-
-		await m('capitalized', {ignoreCase: true});
-
-		noopProcessExists(t, false, pid);
-	});
 }
+
+test('ignore case', async t => {
+	const pid = await noopProcess({title: 'Capitalized'});
+	await m('capitalized', {ignoreCase: true});
+
+	noopProcessExists(t, false, pid);
+});
 
 test('ignore ignore-case for pid', async t => {
 	const pid = await noopProcess();
