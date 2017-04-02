@@ -21,7 +21,7 @@ if (process.platform === 'win32') {
 		const title = 'notepad.exe';
 		const pid = childProcess.spawn(title).pid;
 
-		await m(title);
+		await m(title, {force: true});
 
 		t.false(await processExists(pid));
 	});
