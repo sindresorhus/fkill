@@ -6,14 +6,13 @@ import processExists from 'process-exists';
 import delay from 'delay';
 import m from './';
 
-// Delay we use for processExists check.
-// Without the delay, the check occasianally comes faster than the noop process can exit.
-const noopExitDelay = 10;
+// Ensure the noop process has time to exit
+const noopProcessExitDelay = 10;
 
 test('pid', async t => {
 	const pid = await noopProcess();
 	await m(pid, {force: true});
-	await delay(noopExitDelay);
+	await delay(noopProcessExitDelay);
 	t.false(await processExists(pid));
 });
 
@@ -33,7 +32,7 @@ if (process.platform === 'win32') {
 
 		await m(title);
 
-		await delay(noopExitDelay);
+		await delay(noopProcessExitDelay);
 		t.false(await processExists(pid));
 	});
 
