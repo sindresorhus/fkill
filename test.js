@@ -8,7 +8,7 @@ import m from './';
 
 async function noopProcessKilled(t, pid) {
 	// Ensure the noop process has time to exit
-	await delay(10);
+	await delay(100);
 	t.false(await processExists(pid));
 }
 
