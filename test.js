@@ -23,7 +23,7 @@ if (process.platform === 'win32') {
 		const title = 'notepad.exe';
 		const pid = childProcess.spawn(title).pid;
 
-		await m(title);
+		await m(title, {force: true});
 
 		t.false(await processExists(pid));
 	});
@@ -36,17 +36,29 @@ if (process.platform === 'win32') {
 
 		await noopProcessKilled(t, pid);
 	});
-
-	test('fail', async t => {
-		try {
-			await m(['123456', '654321']);
-			t.fail();
-		} catch (err) {
-			t.regex(err.message, /123456/);
-			t.regex(err.message, /654321/);
-		}
-	});
 }
+
+test('fail', async t => {
+	try {
+		await m(['123456', '654321']);
+		t.fail();
+	} catch (err) {
+		t.regex(err.message, /123456/);
+		t.regex(err.message, /654321/);
+	}
+});
+
+test.serial('don\'t kill self', async t => {
+	const originalFkillPid = process.pid;
+	const pid = await noopProcess();
+	Object.defineProperty(process, 'pid', {value: pid});
+
+	await m(process.pid);
+
+	await delay(noopProcessKilled(t, pid));
+	t.true(await processExists(pid));
+	Object.defineProperty(process, 'pid', {value: originalFkillPid});
+});
 
 test('ignore case', async t => {
 	const pid = await noopProcess({title: 'Capitalized'});
@@ -61,3 +73,4 @@ test('ignore ignore-case for pid', async t => {
 
 	await noopProcessKilled(t, pid);
 });
+

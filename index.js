@@ -7,9 +7,7 @@ const AggregateError = require('aggregate-error');
 
 function winKillProcess(input, opts) {
 	return taskkill(input, {
-		force: opts.force,
-		// Don't kill ourselves
-		filter: `PID ne ${process.pid}`
+		force: opts.force
 	});
 }
 
