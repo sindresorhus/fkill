@@ -8,7 +8,7 @@ import m from './';
 
 async function noopProcessKilled(t, pid) {
 	// Ensure the noop process has time to exit
-	await delay(1000);
+	await delay(100);
 	t.false(await processExists(pid));
 }
 
@@ -27,12 +27,28 @@ if (process.platform === 'win32') {
 
 		t.false(await processExists(pid));
 	});
+
+	test('ignore case', async t => {
+		const title = 'notepad.exe';
+		const pid = childProcess.spawn(title).pid;
+
+		await m('NOTEPAD.EXE', {force: true});
+
+		t.false(await processExists(pid));
+	});
 } else {
 	test('title', async t => {
 		const title = 'fkill-test';
 		const pid = await noopProcess({title});
 
 		await m(title);
+
+		await noopProcessKilled(t, pid);
+	});
+
+	test('ignore case', async t => {
+		const pid = await noopProcess({title: 'Capitalized'});
+		await m('capitalized', {ignoreCase: true});
 
 		await noopProcessKilled(t, pid);
 	});
@@ -58,13 +74,6 @@ test.serial('don\'t kill self', async t => {
 	await delay(noopProcessKilled(t, pid));
 	t.true(await processExists(pid));
 	Object.defineProperty(process, 'pid', {value: originalFkillPid});
-});
-
-test('ignore case', async t => {
-	const pid = await noopProcess({title: 'Capitalized'});
-	await m('capitalized', {ignoreCase: true});
-
-	await noopProcessKilled(t, pid);
 });
 
 test('ignore ignore-case for pid', async t => {

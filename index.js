@@ -1,25 +1,13 @@
 'use strict';
 const arrify = require('arrify');
 const taskkill = require('taskkill');
-const tasklist = require('tasklist');
 const execa = require('execa');
 const AggregateError = require('aggregate-error');
 
-function winKillProcess(input, opts) {
+function winKill(input, opts) {
 	return taskkill(input, {
 		force: opts.force
 	});
-}
-
-function winKill(input, opts) {
-	const killByName = typeof input === 'string';
-	if (killByName && opts.ignoreCase) {
-		return tasklist()
-			.then(tasks => tasks.filter(task => task.imageName.toLowerCase() === input.toLowerCase()))
-			.then(names => Promise.all(names.map(name => winKillProcess(name, opts))));
-	}
-
-	return winKillProcess(input, opts);
 }
 
 function macOSKill(input, opts) {
