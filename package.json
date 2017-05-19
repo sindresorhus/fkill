@@ -32,12 +32,13 @@
     "die",
     "force",
     "ps",
-    "proc"
+    "proc",
+    "terminate"
   ],
   "dependencies": {
-    "aggregate-error": "^0.1.0",
+    "aggregate-error": "^1.0.0",
     "arrify": "^1.0.0",
-    "execa": "^0.2.1",
+    "execa": "^0.6.3",
     "taskkill": "^2.0.0"
   },
   "devDependencies": {
@@ -46,8 +47,5 @@
     "noop-process": "^3.0.0",
     "process-exists": "^2.0.0",
     "xo": "*"
-  },
-  "xo": {
-    "esnext:": true
   }
 }
