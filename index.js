@@ -7,7 +7,7 @@ const AggregateError = require('aggregate-error');
 function win(input, opts) {
 	return taskkill(input, {
 		force: opts.force,
-		tree: typeof opts.tree !== 'undefined' ? opts.tree : true
+		tree: typeof opts.tree === 'undefined' ? true : opts.tree
 	});
 }
 
