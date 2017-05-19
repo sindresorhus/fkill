@@ -56,6 +56,13 @@ Default: `false`
 
 Force kill the process.
 
+##### tree
+
+Type: `boolean`<br>
+Default: `true`
+
+Terminate all child processes along with the parent process (*only on Windows*).
+
 
 ## Related
 
