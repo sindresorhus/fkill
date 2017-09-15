@@ -4,7 +4,7 @@ import test from 'ava';
 import noopProcess from 'noop-process';
 import processExists from 'process-exists';
 import delay from 'delay';
-import m from './';
+import m from '.';
 
 // Ensure the noop process has time to exit
 const noopProcessExitDelay = 10;

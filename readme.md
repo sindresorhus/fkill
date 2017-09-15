@@ -16,7 +16,7 @@ Works on macOS, Linux, Windows.
 ## Install
 
 ```
-$ npm install --save fkill
+$ npm install fkill
 ```
 
 
