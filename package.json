@@ -38,14 +38,14 @@
   "dependencies": {
     "aggregate-error": "^1.0.0",
     "arrify": "^1.0.0",
-    "execa": "^0.6.3",
+    "execa": "^0.8.0",
     "taskkill": "^2.0.0"
   },
   "devDependencies": {
     "ava": "*",
     "delay": "^2.0.0",
     "noop-process": "^3.0.0",
-    "process-exists": "^2.0.0",
+    "process-exists": "^3.0.0",
     "xo": "*"
   }
 }
