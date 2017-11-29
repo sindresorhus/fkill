@@ -19,7 +19,7 @@ test('pid', async t => {
 });
 
 if (process.platform === 'win32') {
-	test('title', async t => {
+	test.serial('title', async t => {
 		const title = 'notepad.exe';
 		const pid = childProcess.spawn(title).pid;
 
@@ -28,7 +28,7 @@ if (process.platform === 'win32') {
 		t.false(await processExists(pid));
 	});
 
-	test('ignore case', async t => {
+	test.serial('win default ignore case', async t => {
 		const title = 'notepad.exe';
 		const pid = childProcess.spawn(title).pid;
 
