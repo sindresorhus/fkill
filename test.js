@@ -82,4 +82,3 @@ test('ignore ignore-case for pid', async t => {
 
 	await noopProcessKilled(t, pid);
 });
-

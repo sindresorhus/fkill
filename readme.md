@@ -43,7 +43,7 @@ Returns a promise.
 
 #### input
 
-Type: `number` `string` `Array<number|string>`
+Type: `number` `string` `number[]` `string[]`
 
 One or more process IDs/names to kill.
 
@@ -70,6 +70,7 @@ Default: `false`
 
 Ignore capitalization when killing a process.
 
+Note that the case is always ignored on Windows.
 
 
 ## Related
