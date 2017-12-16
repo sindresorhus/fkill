@@ -63,6 +63,14 @@ Default: `true`
 
 Kill all child processes along with the parent process. *(Windows only)*
 
+##### ignoreCase
+
+Type: `boolean`<br>
+Default: `false`
+
+Ignore capitalization when killing a process.
+
+
 
 ## Related
 

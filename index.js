@@ -4,19 +4,40 @@ const taskkill = require('taskkill');
 const execa = require('execa');
 const AggregateError = require('aggregate-error');
 
-function win(input, opts) {
+function winKill(input, opts) {
 	return taskkill(input, {
 		force: opts.force,
 		tree: typeof opts.tree === 'undefined' ? true : opts.tree
 	});
 }
 
-function def(input, opts) {
-	const cmd = typeof input === 'string' ? 'killall' : 'kill';
+function macOSKill(input, opts) {
+	const killByName = typeof input === 'string';
+	const cmd = killByName ? 'pkill' : 'kill';
 	const args = [input];
 
 	if (opts.force) {
 		args.unshift('-9');
+	}
+
+	if (killByName && opts.ignoreCase) {
+		args.unshift('-i');
+	}
+
+	return execa(cmd, args);
+}
+
+function defaultKill(input, opts) {
+	const killByName = typeof input === 'string';
+	const cmd = killByName ? 'killall' : 'kill';
+	const args = [input];
+
+	if (opts.force) {
+		args.unshift('-9');
+	}
+
+	if (killByName && opts.ignoreCase) {
+		args.unshift('-I');
 	}
 
 	return execa(cmd, args);
@@ -24,9 +45,16 @@ function def(input, opts) {
 
 module.exports = (input, opts) => {
 	opts = opts || {};
-
-	const fn = process.platform === 'win32' ? win : def;
 	const errors = [];
+
+	let fn;
+	if (process.platform === 'darwin') {
+		fn = macOSKill;
+	} else if (process.platform === 'win32') {
+		fn = winKill;
+	} else {
+		fn = defaultKill;
+	}
 
 	// Don't kill ourselves
 	input = arrify(input).filter(x => x !== process.pid);
