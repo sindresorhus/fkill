@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 const http = require('http');
 
 const srv = http.createServer((req, res) => {

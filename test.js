@@ -1,6 +1,5 @@
 /* eslint-disable ava/no-identical-title */
 import childProcess from 'child_process';
-import path from 'path';
 import test from 'ava';
 import noopProcess from 'noop-process';
 import processExists from 'process-exists';
@@ -87,7 +86,7 @@ test('ignore ignore-case for pid', async t => {
 
 test('kill from port', async t => {
 	const port = await getPort();
-	const pid = childProcess.spawn(path.join(__dirname, 'fixture'), [port]).pid;
+	const pid = childProcess.spawn('node', ['fixture.js', port]).pid;
 	await m(pid);
 	await noopProcessKilled(t, pid);
 	t.is(await getPort(port), port);
