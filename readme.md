@@ -30,8 +30,9 @@ fkill(1337).then(() => {
 });
 
 fkill('Safari');
+fkill(':8080');
 
-fkill([1337, 'Safari']);
+fkill([1337, 'Safari', ':8080']);
 ```
 
 
@@ -45,7 +46,7 @@ Returns a promise.
 
 Type: `number` `string` `number[]` `string[]`
 
-One or more process IDs/names to kill.
+One or more process IDs/names/ports to kill. To kill a port, prefix it with a colon, e.g: `:8080`.
 
 #### options
 

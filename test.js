@@ -4,6 +4,7 @@ import test from 'ava';
 import noopProcess from 'noop-process';
 import processExists from 'process-exists';
 import delay from 'delay';
+import getPort from 'get-port';
 import m from '.';
 
 async function noopProcessKilled(t, pid) {
@@ -81,4 +82,12 @@ test('ignore ignore-case for pid', async t => {
 	await m(pid, {force: true, ignoreCase: true});
 
 	await noopProcessKilled(t, pid);
+});
+
+test('kill from port', async t => {
+	const port = await getPort();
+	const pid = childProcess.spawn('./fixture', [port]).pid;
+	await m(pid);
+	await noopProcessKilled(t, pid);
+	t.is(await getPort(port), port);
 });
