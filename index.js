@@ -3,7 +3,11 @@ const arrify = require('arrify');
 const taskkill = require('taskkill');
 const execa = require('execa');
 const AggregateError = require('aggregate-error');
+<<<<<<< HEAD
 const pidFromPort = require('pid-from-port');
+=======
+const psList = require('ps-list');
+>>>>>>> Not found (#1)
 
 function winKill(input, opts) {
 	return taskkill(input, {
