@@ -87,7 +87,7 @@ test('ignore ignore-case for pid', async t => {
 test('kill from port', async t => {
 	const port = await getPort();
 	const pid = childProcess.spawn('node', ['fixture.js', port]).pid;
-	await m(pid);
+	await m(pid, {force: true});
 	await noopProcessKilled(t, pid);
 	t.is(await getPort(port), port);
 });
