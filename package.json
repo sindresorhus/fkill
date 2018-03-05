@@ -47,7 +47,6 @@
 		"delay": "^2.0.0",
 		"get-port": "^3.2.0",
 		"noop-process": "^3.0.0",
-		"process-exists": "^3.0.0",
 		"xo": "*"
 	}
 }

@@ -4,10 +4,14 @@ const taskkill = require('taskkill');
 const execa = require('execa');
 const AggregateError = require('aggregate-error');
 <<<<<<< HEAD
+<<<<<<< HEAD
 const pidFromPort = require('pid-from-port');
 =======
 const psList = require('ps-list');
 >>>>>>> Not found (#1)
+=======
+const processExists = require('process-exists');
+>>>>>>> Update with new process-exists version
 
 function winKill(input, opts) {
 	return taskkill(input, {
