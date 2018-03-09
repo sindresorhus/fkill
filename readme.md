@@ -46,7 +46,9 @@ Returns a promise.
 
 Type: `number` `string` `number[]` `string[]`
 
-One or more process IDs/names/ports to kill. To kill a port, prefix it with a colon, e.g: `:8080`.
+One or more process IDs/names/ports to kill.
+
+To kill a port, prefix it with a colon. For example: `:8080`.
 
 #### options
 
