@@ -3,6 +3,7 @@ const arrify = require('arrify');
 const taskkill = require('taskkill');
 const execa = require('execa');
 const AggregateError = require('aggregate-error');
+const pidFromPort = require('pid-from-port');
 
 function winKill(input, opts) {
 	return taskkill(input, {
@@ -43,6 +44,14 @@ function defaultKill(input, opts) {
 	return execa(cmd, args);
 }
 
+function parseInput(input) {
+	if (typeof input === 'string' && input[0] === ':') {
+		return pidFromPort(parseInt(input.slice(1), 10));
+	}
+
+	return Promise.resolve(input);
+}
+
 module.exports = (input, opts) => {
 	opts = opts || {};
 	const errors = [];
@@ -56,14 +65,11 @@ module.exports = (input, opts) => {
 		fn = defaultKill;
 	}
 
-	// Don't kill ourselves
-	input = arrify(input).filter(x => x !== process.pid);
-
-	return Promise.all(input.map(input => {
-		return fn(input, opts).catch(err => {
+	return Promise.all(arrify(input).map(input => parseInput(input)
+		.then(input => input !== process.pid && fn(input, opts).catch(err => {
 			errors.push(`Killing process ${input} failed: ${err.message.replace(/.*\n/, '').replace(/kill: \d+: /, '').trim()}`);
-		});
-	})).then(() => {
+		}))
+	)).then(() => {
 		if (errors.length > 0) {
 			throw new AggregateError(errors);
 		}
