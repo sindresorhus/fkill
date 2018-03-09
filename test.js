@@ -84,15 +84,10 @@ test('ignore ignore-case for pid', async t => {
 	await noopProcessKilled(t, pid);
 });
 
-<<<<<<< HEAD
 test('kill from port', async t => {
 	const port = await getPort();
 	const pid = childProcess.spawn('node', ['fixture.js', port]).pid;
 	await m(pid, {force: true});
 	await noopProcessKilled(t, pid);
 	t.is(await getPort(port), port);
-=======
-test('error when process is not found', async t => {
-	await t.throws(m(['notFoundProcess']), /Killing process notFoundProcess failed: Process doesn't exist/);
->>>>>>> Update test
 });
