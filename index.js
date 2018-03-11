@@ -4,7 +4,6 @@ const taskkill = require('taskkill');
 const execa = require('execa');
 const AggregateError = require('aggregate-error');
 const pidFromPort = require('pid-from-port');
-const psList = require('ps-list');
 const processExists = require('process-exists');
 
 function winKill(input, opts) {
@@ -67,11 +66,19 @@ module.exports = (input, opts) => {
 		fn = defaultKill;
 	}
 
-	return Promise.all(arrify(input).map(input => parseInput(input)
-		.then(input => input !== process.pid && fn(input, opts).catch(err => {
-			errors.push(`Killing process ${input} failed: ${err.message.replace(/.*\n/, '').replace(/kill: \d+: /, '').trim()}`);
-		}))
-	)).then(() => {
+	input = arrify(input);
+
+	return processExists.all(input)
+		.then(exists => Promise.all(input.map(input => parseInput(input)
+			.then(input => input !== process.pid && fn(input, opts).catch(err => {
+				if (!exists.get(input)) {
+					errors.push(`Killing process ${input} failed: Process doesn't exist`);
+					return;
+				}
+
+				errors.push(`Killing process ${input} failed: ${err.message.replace(/.*\n/, '').replace(/kill: \d+: /, '').trim()}`);
+			}))
+	))).then(() => {
 		if (errors.length > 0) {
 			throw new AggregateError(errors);
 		}
