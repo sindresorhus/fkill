@@ -91,3 +91,7 @@ test('kill from port', async t => {
 	await noopProcessKilled(t, pid);
 	t.is(await getPort(port), port);
 });
+
+test('error when process is not found', async t => {
+	await t.throws(m(['notFoundProcess']), /Killing process notFoundProcess failed: Process doesn't exist/);
+});
