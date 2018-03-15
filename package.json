@@ -1,6 +1,6 @@
 {
 	"name": "fkill",
-	"version": "5.2.0",
+	"version": "5.3.0",
 	"description": "Fabulously kill processes. Cross-platform.",
 	"license": "MIT",
 	"repository": "sindresorhus/fkill",
