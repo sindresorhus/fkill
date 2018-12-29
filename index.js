@@ -70,17 +70,17 @@ module.exports = (input, opts) => {
 
 	return processExists.all(input)
 		.then(exists => Promise.all(input.map(input => parseInput(input)
-			.then(input => input !== process.pid && fn(input, opts).catch(err => {
+			.then(input => input !== process.pid && fn(input, opts).catch(error => {
 				if (!exists.get(input)) {
 					errors.push(`Killing process ${input} failed: Process doesn't exist`);
 					return;
 				}
 
-				errors.push(`Killing process ${input} failed: ${err.message.replace(/.*\n/, '').replace(/kill: \d+: /, '').trim()}`);
+				errors.push(`Killing process ${input} failed: ${error.message.replace(/.*\n/, '').replace(/kill: \d+: /, '').trim()}`);
 			}))
-	))).then(() => {
-		if (errors.length > 0) {
-			throw new AggregateError(errors);
-		}
-	});
+		))).then(() => {
+			if (errors.length > 0) {
+				throw new AggregateError(errors);
+			}
+		});
 };
