@@ -6,81 +6,96 @@ const AggregateError = require('aggregate-error');
 const pidFromPort = require('pid-from-port');
 const processExists = require('process-exists');
 
-function winKill(input, opts) {
+const winKill = (input, options) => {
 	return taskkill(input, {
-		force: opts.force,
-		tree: typeof opts.tree === 'undefined' ? true : opts.tree
+		force: options.force,
+		tree: typeof options.tree === 'undefined' ? true : options.tree
 	});
-}
+};
 
-function macOSKill(input, opts) {
+const macOSKill = (input, options) => {
 	const killByName = typeof input === 'string';
 	const cmd = killByName ? 'pkill' : 'kill';
 	const args = [input];
 
-	if (opts.force) {
+	if (options.force) {
 		args.unshift('-9');
 	}
 
-	if (killByName && opts.ignoreCase) {
+	if (killByName && options.ignoreCase) {
 		args.unshift('-i');
 	}
 
 	return execa(cmd, args);
-}
+};
 
-function defaultKill(input, opts) {
+const defaultKill = (input, options) => {
 	const killByName = typeof input === 'string';
 	const cmd = killByName ? 'killall' : 'kill';
 	const args = [input];
 
-	if (opts.force) {
+	if (options.force) {
 		args.unshift('-9');
 	}
 
-	if (killByName && opts.ignoreCase) {
+	if (killByName && options.ignoreCase) {
 		args.unshift('-I');
 	}
 
 	return execa(cmd, args);
-}
+};
 
-function parseInput(input) {
+const kill = (() => {
+	if (process.platform === 'darwin') {
+		return macOSKill;
+	}
+
+	if (process.platform === 'win32') {
+		return winKill;
+	}
+
+	return defaultKill;
+})();
+
+const parseInput = async input => {
 	if (typeof input === 'string' && input[0] === ':') {
 		return pidFromPort(parseInt(input.slice(1), 10));
 	}
 
-	return Promise.resolve(input);
-}
+	return input;
+};
 
-module.exports = (input, opts) => {
-	opts = opts || {};
+module.exports = async (inputs, options = {}) => {
+	inputs = arrify(inputs);
+
+	const exists = await processExists.all(inputs);
+
 	const errors = [];
 
-	let fn;
-	if (process.platform === 'darwin') {
-		fn = macOSKill;
-	} else if (process.platform === 'win32') {
-		fn = winKill;
-	} else {
-		fn = defaultKill;
-	}
+	const handleKill = async input => {
+		try {
+			input = await parseInput(input);
 
-	input = arrify(input);
-
-	return processExists.all(input)
-		.then(exists => Promise.all(input.map(input => parseInput(input)
-			.then(input => input !== process.pid && fn(input, opts).catch(error => {
-				if (!exists.get(input)) {
-					errors.push(`Killing process ${input} failed: Process doesn't exist`);
-					return;
-				}
-
-				errors.push(`Killing process ${input} failed: ${error.message.replace(/.*\n/, '').replace(/kill: \d+: /, '').trim()}`);
-			}))
-		))).then(() => {
-			if (errors.length > 0) {
-				throw new AggregateError(errors);
+			if (input === process.pid) {
+				return;
 			}
-		});
+
+			await kill(input, options);
+		} catch (error) {
+			if (!exists.get(input)) {
+				errors.push(`Killing process ${input} failed: Process doesn't exist`);
+				return;
+			}
+
+			errors.push(`Killing process ${input} failed: ${error.message.replace(/.*\n/, '').replace(/kill: \d+: /, '').trim()}`);
+		}
+	};
+
+	await Promise.all(
+		inputs.map(input => handleKill(input))
+	);
+
+	if (errors.length > 0) {
+		throw new AggregateError(errors);
+	}
 };

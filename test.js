@@ -5,7 +5,7 @@ import noopProcess from 'noop-process';
 import processExists from 'process-exists';
 import delay from 'delay';
 import getPort from 'get-port';
-import m from '.';
+import fkill from '.';
 
 async function noopProcessKilled(t, pid) {
 	// Ensure the noop process has time to exit
@@ -15,7 +15,7 @@ async function noopProcessKilled(t, pid) {
 
 test('pid', async t => {
 	const pid = await noopProcess();
-	await m(pid, {force: true});
+	await fkill(pid, {force: true});
 	await noopProcessKilled(t, pid);
 });
 
@@ -24,7 +24,7 @@ if (process.platform === 'win32') {
 		const title = 'notepad.exe';
 		const {pid} = childProcess.spawn(title);
 
-		await m(title, {force: true});
+		await fkill(title, {force: true});
 
 		t.false(await processExists(pid));
 	});
@@ -33,7 +33,7 @@ if (process.platform === 'win32') {
 		const title = 'notepad.exe';
 		const {pid} = childProcess.spawn(title);
 
-		await m('NOTEPAD.EXE', {force: true});
+		await fkill('NOTEPAD.EXE', {force: true});
 
 		t.false(await processExists(pid));
 	});
@@ -42,27 +42,23 @@ if (process.platform === 'win32') {
 		const title = 'fkill-test';
 		const pid = await noopProcess({title});
 
-		await m(title);
+		await fkill(title);
 
 		await noopProcessKilled(t, pid);
 	});
 
 	test('ignore case', async t => {
 		const pid = await noopProcess({title: 'Capitalized'});
-		await m('capitalized', {ignoreCase: true});
+		await fkill('capitalized', {ignoreCase: true});
 
 		await noopProcessKilled(t, pid);
 	});
 }
 
 test('fail', async t => {
-	try {
-		await m(['123456', '654321']);
-		t.fail();
-	} catch (error) {
-		t.regex(error.message, /123456/);
-		t.regex(error.message, /654321/);
-	}
+	const error = await t.throwsAsync(fkill(['123456', '654321']));
+	t.regex(error.message, /123456/);
+	t.regex(error.message, /654321/);
 });
 
 test.serial('don\'t kill self', async t => {
@@ -70,7 +66,7 @@ test.serial('don\'t kill self', async t => {
 	const pid = await noopProcess();
 	Object.defineProperty(process, 'pid', {value: pid});
 
-	await m(process.pid);
+	await fkill(process.pid);
 
 	await delay(noopProcessKilled(t, pid));
 	t.true(await processExists(pid));
@@ -79,7 +75,7 @@ test.serial('don\'t kill self', async t => {
 
 test('ignore ignore-case for pid', async t => {
 	const pid = await noopProcess();
-	await m(pid, {force: true, ignoreCase: true});
+	await fkill(pid, {force: true, ignoreCase: true});
 
 	await noopProcessKilled(t, pid);
 });
@@ -87,11 +83,11 @@ test('ignore ignore-case for pid', async t => {
 test('kill from port', async t => {
 	const port = await getPort();
 	const {pid} = childProcess.spawn('node', ['fixture.js', port]);
-	await m(pid, {force: true});
+	await fkill(pid, {force: true});
 	await noopProcessKilled(t, pid);
-	t.is(await getPort(port), port);
+	t.is(await getPort({port}), port);
 });
 
 test('error when process is not found', async t => {
-	await t.throwsAsync(m(['notFoundProcess']), /Killing process notFoundProcess failed: Process doesn't exist/);
+	await t.throwsAsync(fkill(['notFoundProcess']), /Killing process notFoundProcess failed: Process doesn't exist/);
 });

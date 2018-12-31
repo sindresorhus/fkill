@@ -25,9 +25,10 @@ $ npm install fkill
 ```js
 const fkill = require('fkill');
 
-fkill(1337).then(() => {
+(async () => {
+	await fkill(1337);
 	console.log('Killed process');
-});
+})();
 
 fkill('Safari');
 fkill(':8080');
