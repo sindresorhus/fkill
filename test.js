@@ -22,7 +22,7 @@ test('pid', async t => {
 if (process.platform === 'win32') {
 	test.serial('title', async t => {
 		const title = 'notepad.exe';
-		const pid = childProcess.spawn(title).pid;
+		const {pid} = childProcess.spawn(title);
 
 		await m(title, {force: true});
 
@@ -31,7 +31,7 @@ if (process.platform === 'win32') {
 
 	test.serial('win default ignore case', async t => {
 		const title = 'notepad.exe';
-		const pid = childProcess.spawn(title).pid;
+		const {pid} = childProcess.spawn(title);
 
 		await m('NOTEPAD.EXE', {force: true});
 
@@ -59,9 +59,9 @@ test('fail', async t => {
 	try {
 		await m(['123456', '654321']);
 		t.fail();
-	} catch (err) {
-		t.regex(err.message, /123456/);
-		t.regex(err.message, /654321/);
+	} catch (error) {
+		t.regex(error.message, /123456/);
+		t.regex(error.message, /654321/);
 	}
 });
 
@@ -86,12 +86,12 @@ test('ignore ignore-case for pid', async t => {
 
 test('kill from port', async t => {
 	const port = await getPort();
-	const pid = childProcess.spawn('node', ['fixture.js', port]).pid;
+	const {pid} = childProcess.spawn('node', ['fixture.js', port]);
 	await m(pid, {force: true});
 	await noopProcessKilled(t, pid);
 	t.is(await getPort(port), port);
 });
 
 test('error when process is not found', async t => {
-	await t.throws(m(['notFoundProcess']), /Killing process notFoundProcess failed: Process doesn't exist/);
+	await t.throwsAsync(m(['notFoundProcess']), /Killing process notFoundProcess failed: Process doesn't exist/);
 });
