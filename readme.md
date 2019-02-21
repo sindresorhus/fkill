@@ -76,6 +76,13 @@ Ignore capitalization when killing a process.
 
 Note that the case is always ignored on Windows.
 
+##### silent
+
+Type: `boolean`<br>
+Default: `false`
+
+Suppress all error messages. For example: `Process doesn't exist`.
+
 
 ## Related
 
