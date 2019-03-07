@@ -5,6 +5,7 @@ const execa = require('execa');
 const AggregateError = require('aggregate-error');
 const pidFromPort = require('pid-from-port');
 const processExists = require('process-exists');
+const psList = require('ps-list');
 
 const missingBinaryError = async (command, arguments_) => {
 	try {
@@ -91,6 +92,16 @@ const fkill = async (inputs, options = {}) => {
 			input = await parseInput(input);
 
 			if (input === process.pid) {
+				return;
+			}
+
+			if (input === 'node') {
+				const processes = await psList();
+				processes.forEach(async ps => {
+					if (ps.name === 'node' && ps.pid !== process.pid) {
+						await kill(ps.pid, options);
+					}
+				});
 				return;
 			}
 
