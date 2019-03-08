@@ -1,4 +1,5 @@
 'use strict';
+
 const arrify = require('arrify');
 const taskkill = require('taskkill');
 const execa = require('execa');
@@ -65,7 +66,7 @@ const parseInput = async input => {
 	return input;
 };
 
-module.exports = async (inputs, options = {}) => {
+const fkill = async (inputs, options = {}) => {
 	inputs = arrify(inputs);
 
 	const exists = await processExists.all(inputs);
@@ -99,3 +100,6 @@ module.exports = async (inputs, options = {}) => {
 		throw new AggregateError(errors);
 	}
 };
+
+module.exports = fkill;
+module.exports.default = fkill;

@@ -13,10 +13,11 @@
 		"node": ">=8"
 	},
 	"scripts": {
-		"test": "xo && ava"
+		"test": "xo && ava && tsd-check"
 	},
 	"files": [
-		"index.js"
+		"index.js",
+		"index.d.ts"
 	],
 	"keywords": [
 		"fkill",
@@ -48,6 +49,7 @@
 		"delay": "^4.1.0",
 		"get-port": "^4.1.0",
 		"noop-process": "^3.0.0",
-		"xo": "^0.23.0"
+		"tsd-check": "^0.3.0",
+		"xo": "^0.24.0"
 	}
 }
