@@ -7,7 +7,8 @@ const pidFromPort = require('pid-from-port');
 const processExists = require('process-exists');
 
 const winKill = (input, options) => {
-	return taskkill(input, {
+	const newInput = typeof input === 'string' ? input.concat('*') : input;
+	return taskkill(newInput, {
 		force: options.force,
 		tree: typeof options.tree === 'undefined' ? true : options.tree
 	});
