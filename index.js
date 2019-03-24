@@ -7,6 +7,20 @@ const AggregateError = require('aggregate-error');
 const pidFromPort = require('pid-from-port');
 const processExists = require('process-exists');
 
+const execaWithNotInstalledError = async (cmd, args) => {
+	try {
+		return await execa(cmd, args);
+	} catch (error) {
+		if (error.code === 'ENOENT') {
+			const newError = new Error(`'${cmd}' doesn't seem to be installed and is required by fkill`);
+			newError.sourceError = error;
+			throw newError;
+		}
+
+		throw error;
+	}
+};
+
 const winKill = (input, options) => {
 	return taskkill(input, {
 		force: options.force,
@@ -27,7 +41,7 @@ const macOSKill = (input, options) => {
 		args.unshift('-i');
 	}
 
-	return execa(cmd, args);
+	return execaWithNotInstalledError(cmd, args);
 };
 
 const defaultKill = (input, options) => {
@@ -43,7 +57,7 @@ const defaultKill = (input, options) => {
 		args.unshift('-I');
 	}
 
-	return execa(cmd, args);
+	return execaWithNotInstalledError(cmd, args);
 };
 
 const kill = (() => {
