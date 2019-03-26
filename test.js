@@ -1,5 +1,6 @@
 /* eslint-disable ava/no-identical-title */
 import childProcess from 'child_process';
+import path from 'path';
 import test from 'ava';
 import noopProcess from 'noop-process';
 import processExists from 'process-exists';
@@ -90,4 +91,23 @@ test('kill from port', async t => {
 
 test('error when process is not found', async t => {
 	await t.throwsAsync(fkill(['notFoundProcess']), /Killing process notFoundProcess failed: Process doesn't exist/);
+});
+
+test.cb('kill all descendants processes as well', t => {
+	const cp = childProcess.spawn(path.resolve('fixtures', 'descendant'));
+
+	cp.stdout.setEncoding('utf8');
+	cp.stdout.on('data', async chunk => {
+		const descendantPid = parseInt(chunk, 10);
+		t.is(typeof descendantPid, 'number');
+
+		await fkill(cp.pid, {tree: true});
+		
+		// Ensure the noop process has time to exit
+		await delay(100);
+	
+		t.false(await processExists(cp.pid));
+		t.false(await processExists(descendantPid));
+		t.end();
+	});
 });
