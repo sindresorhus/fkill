@@ -1,0 +1,8 @@
+#!/usr/bin/env node
+'use strict';
+const path = require('path');
+const { spawn } = require('child_process');
+
+const forever = spawn(path.resolve(__dirname, 'forever'));
+
+console.log(forever.pid);
