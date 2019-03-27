@@ -2,10 +2,24 @@
 
 const arrify = require('arrify');
 const taskkill = require('taskkill');
+const treekill = require('tree-kill');
+const psList = require('ps-list');
 const execa = require('execa');
 const AggregateError = require('aggregate-error');
 const pidFromPort = require('pid-from-port');
 const processExists = require('process-exists');
+
+async function getPidsFromInput(input, options) {
+	if (typeof input === 'number') {
+		return [input];
+	}
+
+	const nameRe = new RegExp(`^${input}$`, options.ignoreCase ? 'i' : '');
+
+	return (await psList())
+		.filter(ps => nameRe.test(ps.name))
+		.map(ps => ps.pid);
+}
 
 const winKill = (input, options) => {
 	return taskkill(input, {
@@ -15,6 +29,14 @@ const winKill = (input, options) => {
 };
 
 const macOSKill = (input, options) => {
+	if (options.tree) {
+		const signal = options.force ? 'SIGKILL' : 'SIGTERM';
+		const pids = await getPidsFromInput(input, options);
+		return Promise.all(
+			pids.map(pid => treekill(pid, signal))
+		);
+	}
+
 	const killByName = typeof input === 'string';
 	const cmd = killByName ? 'pkill' : 'kill';
 	const args = [input];
@@ -30,7 +52,15 @@ const macOSKill = (input, options) => {
 	return execa(cmd, args);
 };
 
-const defaultKill = (input, options) => {
+const defaultKill = async (input, options) => {
+	if (options.tree) {
+		const signal = options.force ? 'SIGKILL' : 'SIGTERM';
+		const pids = await getPidsFromInput(input, options);
+		return Promise.all(
+			pids.map(pid => treekill(pid, signal))
+		);
+	}
+
 	const killByName = typeof input === 'string';
 	const cmd = killByName ? 'killall' : 'kill';
 	const args = [input];
