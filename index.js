@@ -28,7 +28,7 @@ const winKill = (input, options) => {
 	});
 };
 
-const macOSKill = (input, options) => {
+const macOSKill = async (input, options) => {
 	if (options.tree) {
 		const signal = options.force ? 'SIGKILL' : 'SIGTERM';
 		const pids = await getPidsFromInput(input, options);
