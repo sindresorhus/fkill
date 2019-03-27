@@ -93,21 +93,33 @@ test('error when process is not found', async t => {
 	await t.throwsAsync(fkill(['notFoundProcess']), /Killing process notFoundProcess failed: Process doesn't exist/);
 });
 
-test.cb('kill all descendants processes as well', t => {
-	const cp = childProcess.spawn(path.resolve('fixtures', 'descendant'));
+function testKillDescendant(t, named) {
+	const name = 'fkill-descen';
+
+	const fixture = path.resolve('fixtures', `descendant${named ? '-named' : ''}`);
+	const cp = childProcess.spawn(fixture, [name]);
 
 	cp.stdout.setEncoding('utf8');
 	cp.stdout.on('data', async chunk => {
 		const descendantPid = parseInt(chunk, 10);
 		t.is(typeof descendantPid, 'number');
 
-		await fkill(cp.pid, {tree: true});
-		
-		// Ensure the noop process has time to exit
+		if (named) {
+			await fkill(name, {tree: true});
+		} else {
+			await fkill(cp.pid, {tree: true});
+		}
+
+		// Ensure all the processes has time to exit
 		await delay(100);
-	
+
 		t.false(await processExists(cp.pid));
 		t.false(await processExists(descendantPid));
 		t.end();
 	});
-});
+}
+
+// eslint-disable-next-line ava/test-ended
+test.cb('kill all descendants tree by pid', testKillDescendant, false);
+// eslint-disable-next-line ava/test-ended
+test.cb('kill all descendants tree by name', testKillDescendant, true);
