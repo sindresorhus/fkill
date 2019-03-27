@@ -111,7 +111,7 @@ function testKillDescendant(t, named) {
 		}
 
 		// Ensure all the processes has time to exit
-		await delay(100);
+		await delay(200);
 
 		t.false(await processExists(cp.pid));
 		t.false(await processExists(descendantPid));
