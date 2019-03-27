@@ -93,10 +93,8 @@ test('error when process is not found', async t => {
 	await t.throwsAsync(fkill(['notFoundProcess']), /Killing process notFoundProcess failed: Process doesn't exist/);
 });
 
-function testKillDescendant(t, named) {
-	const name = 'fkill-descen';
-
-	const fixture = path.resolve('fixtures', `descendant${named ? '-named' : ''}`);
+function testKillDescendant(t, name = '') {
+	const fixture = path.resolve('fixtures', 'descendant');
 	const cp = childProcess.spawn('node', [fixture, name]);
 
 	cp.stdout.setEncoding('utf8');
@@ -109,7 +107,7 @@ function testKillDescendant(t, named) {
 			force: process.platform === 'win32'
 		};
 
-		if (named) {
+		if (name) {
 			await fkill(name, opts);
 		} else {
 			await fkill(cp.pid, opts);
@@ -125,9 +123,9 @@ function testKillDescendant(t, named) {
 }
 
 // eslint-disable-next-line ava/test-ended
-test.cb('kill all descendants tree by pid', testKillDescendant, false);
+test.cb('kill all descendants tree by pid', testKillDescendant);
 
 if (process.platform !== 'win32') {
 	// eslint-disable-next-line ava/test-ended
-	test.cb('kill all descendants tree by name', testKillDescendant, true);
+	test.cb('kill all descendants tree by name', testKillDescendant, 'fkill-descen');
 }
