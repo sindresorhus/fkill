@@ -97,21 +97,26 @@ function testKillDescendant(t, named) {
 	const name = 'fkill-descen';
 
 	const fixture = path.resolve('fixtures', `descendant${named ? '-named' : ''}`);
-	const cp = childProcess.spawn(fixture, [name]);
+	const cp = childProcess.spawn('node', [fixture, name]);
 
 	cp.stdout.setEncoding('utf8');
 	cp.stdout.on('data', async chunk => {
 		const descendantPid = parseInt(chunk, 10);
 		t.is(typeof descendantPid, 'number');
 
+		const opts = {
+			tree: true,
+			force: process.platform === 'win32'
+		};
+
 		if (named) {
-			await fkill(name, {tree: true});
+			await fkill(name, opts);
 		} else {
-			await fkill(cp.pid, {tree: true});
+			await fkill(cp.pid, opts);
 		}
 
 		// Ensure all the processes has time to exit
-		await delay(200);
+		await delay(400);
 
 		t.false(await processExists(cp.pid));
 		t.false(await processExists(descendantPid));
@@ -121,5 +126,8 @@ function testKillDescendant(t, named) {
 
 // eslint-disable-next-line ava/test-ended
 test.cb('kill all descendants tree by pid', testKillDescendant, false);
-// eslint-disable-next-line ava/test-ended
-test.cb('kill all descendants tree by name', testKillDescendant, true);
+
+if (process.platform !== 'win32') {
+	// eslint-disable-next-line ava/test-ended
+	test.cb('kill all descendants tree by name', testKillDescendant, true);
+}

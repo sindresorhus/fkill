@@ -1,8 +1,11 @@
 #!/usr/bin/env node
 'use strict';
-const path = require('path');
 const { spawn } = require('child_process');
 
-const forever = spawn(path.resolve(__dirname, 'forever'));
+if (process.argv[2]) {
+	process.title = process.argv[2];
+}
+
+const forever = spawn('node', ['-e', 'setTimeout(function () {}, 20000)']);
 
 console.log(forever.pid);
