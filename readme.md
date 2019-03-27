@@ -67,7 +67,7 @@ Force kill the process.
 Type: `boolean`<br>
 Default: `true`
 
-Kill all child processes along with the parent process. *(Windows only)*
+Kill all child processes along with the parent process.
 
 ##### ignoreCase
 
