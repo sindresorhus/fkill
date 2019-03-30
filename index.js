@@ -102,4 +102,5 @@ const fkill = async (inputs, options = {}) => {
 };
 
 module.exports = fkill;
+// TODO: remove this in the next major version
 module.exports.default = fkill;
