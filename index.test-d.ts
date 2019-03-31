@@ -1,5 +1,5 @@
-import {expectType} from 'tsd-check';
-import fkill from '.';
+import {expectType} from 'tsd';
+import fkill = require('.');
 
 expectType<Promise<void>>(fkill(1337));
 expectType<Promise<void>>(fkill('Safari'));
