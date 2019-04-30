@@ -96,7 +96,7 @@ const fkill = async (inputs, options = {}) => {
 		inputs.map(input => handleKill(input))
 	);
 
-	if (errors.length > 0) {
+	if (errors.length > 0 && !options.silent) {
 		throw new AggregateError(errors);
 	}
 };
