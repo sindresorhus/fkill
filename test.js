@@ -73,7 +73,7 @@ test.serial('don\'t kill self', async t => {
 	Object.defineProperty(process, 'pid', {value: originalFkillPid});
 });
 
-test.serial('don\'t kill self when kill node', async t => {
+test.serial('don\'t kill `fkill` when killing `node`', async t => {
 	const originalFkillPid = process.pid;
 	await fkill('node');
 
