@@ -97,11 +97,11 @@ const fkill = async (inputs, options = {}) => {
 
 			if (input === 'node') {
 				const processes = await psList();
-				processes.forEach(async ps => {
+				await Promise.all(processes.map(async ps => {
 					if (ps.name === 'node' && ps.pid !== process.pid) {
 						await kill(ps.pid, options);
 					}
-				});
+				}));
 				return;
 			}
 
