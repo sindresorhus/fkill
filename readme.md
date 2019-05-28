@@ -53,7 +53,7 @@ To kill a port, prefix it with a colon. For example: `:8080`.
 
 #### options
 
-Type: `Object`
+Type: `object`
 
 ##### force
 
@@ -90,8 +90,3 @@ Suppress all error messages. For example: `Process doesn't exist`.
 
 - [fkill-cli](https://github.com/sindresorhus/fkill-cli) - CLI for this module
 - [alfred-fkill](https://github.com/SamVerschueren/alfred-fkill) - Alfred workflow for this module
-
-
-## License
-
-MIT © [Sindre Sorhus](https://sindresorhus.com)

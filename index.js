@@ -1,5 +1,4 @@
 'use strict';
-
 const arrify = require('arrify');
 const taskkill = require('taskkill');
 const execa = require('execa');
@@ -7,12 +6,12 @@ const AggregateError = require('aggregate-error');
 const pidFromPort = require('pid-from-port');
 const processExists = require('process-exists');
 
-const execaWithNotInstalledError = async (cmd, args) => {
+const missingBinaryError = async (command, arguments_) => {
 	try {
-		return await execa(cmd, args);
+		return await execa(command, arguments_);
 	} catch (error) {
 		if (error.code === 'ENOENT') {
-			const newError = new Error(`'${cmd}' doesn't seem to be installed and is required by fkill`);
+			const newError = new Error(`\`${command}\` doesn't seem to be installed and is required by fkill`);
 			newError.sourceError = error;
 			throw newError;
 		}
@@ -21,52 +20,52 @@ const execaWithNotInstalledError = async (cmd, args) => {
 	}
 };
 
-const winKill = (input, options) => {
+const windowsKill = (input, options) => {
 	return taskkill(input, {
 		force: options.force,
 		tree: typeof options.tree === 'undefined' ? true : options.tree
 	});
 };
 
-const macOSKill = (input, options) => {
+const macosKill = (input, options) => {
 	const killByName = typeof input === 'string';
-	const cmd = killByName ? 'pkill' : 'kill';
-	const args = [input];
+	const command = killByName ? 'pkill' : 'kill';
+	const arguments_ = [input];
 
 	if (options.force) {
-		args.unshift('-9');
+		arguments_.unshift('-9');
 	}
 
 	if (killByName && options.ignoreCase) {
-		args.unshift('-i');
+		arguments_.unshift('-i');
 	}
 
-	return execaWithNotInstalledError(cmd, args);
+	return missingBinaryError(command, arguments_);
 };
 
 const defaultKill = (input, options) => {
 	const killByName = typeof input === 'string';
-	const cmd = killByName ? 'killall' : 'kill';
-	const args = [input];
+	const command = killByName ? 'killall' : 'kill';
+	const arguments_ = [input];
 
 	if (options.force) {
-		args.unshift('-9');
+		arguments_.unshift('-9');
 	}
 
 	if (killByName && options.ignoreCase) {
-		args.unshift('-I');
+		arguments_.unshift('-I');
 	}
 
-	return execaWithNotInstalledError(cmd, args);
+	return missingBinaryError(command, arguments_);
 };
 
 const kill = (() => {
 	if (process.platform === 'darwin') {
-		return macOSKill;
+		return macosKill;
 	}
 
 	if (process.platform === 'win32') {
-		return winKill;
+		return windowsKill;
 	}
 
 	return defaultKill;
