@@ -10,7 +10,7 @@
 
 [![Build Status](https://travis-ci.org/sindresorhus/fkill.svg?branch=master)](https://travis-ci.org/sindresorhus/fkill)
 
-Works on macOS, Linux, Windows.
+Works on macOS (10.13 or later), Linux, Windows.
 
 
 ## Install
@@ -41,17 +41,19 @@ fkill([1337, 'Safari', ':8080']);
 
 ### fkill(input, [options])
 
-Returns a promise.
+Returns a promise that resolves when the process is killed.
 
 #### input
 
-Type: `number` `string` `number[]` `string[]`
+Type: `number | string | Array<number | string>`
 
 One or more process IDs/names/ports to kill.
 
 To kill a port, prefix it with a colon. For example: `:8080`.
 
 #### options
+
+Type: `object`
 
 ##### force
 
@@ -76,13 +78,15 @@ Ignore capitalization when killing a process.
 
 Note that the case is always ignored on Windows.
 
+##### silent
+
+Type: `boolean`<br>
+Default: `false`
+
+Suppress all error messages. For example: `Process doesn't exist`.
+
 
 ## Related
 
 - [fkill-cli](https://github.com/sindresorhus/fkill-cli) - CLI for this module
 - [alfred-fkill](https://github.com/SamVerschueren/alfred-fkill) - Alfred workflow for this module
-
-
-## License
-
-MIT © [Sindre Sorhus](https://sindresorhus.com)

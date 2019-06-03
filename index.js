@@ -6,6 +6,20 @@ const AggregateError = require('aggregate-error');
 const pidFromPort = require('pid-from-port');
 const processExists = require('process-exists');
 
+const missingBinaryError = async (command, arguments_) => {
+	try {
+		return await execa(command, arguments_);
+	} catch (error) {
+		if (error.code === 'ENOENT') {
+			const newError = new Error(`\`${command}\` doesn't seem to be installed and is required by fkill`);
+			newError.sourceError = error;
+			throw newError;
+		}
+
+		throw error;
+	}
+};
+
 const killWithTask = (input, options) => {
 	return taskkill(input, {
 		force: options.force,
@@ -13,7 +27,7 @@ const killWithTask = (input, options) => {
 	});
 };
 
-const winKill = async (input, options) => {
+const windowsKill = async (input, options) => {
 	try {
 		const firstTry = input;
 		return await killWithTask(firstTry, options);
@@ -25,45 +39,45 @@ const winKill = async (input, options) => {
 	}
 };
 
-const macOSKill = (input, options) => {
+const macosKill = (input, options) => {
 	const killByName = typeof input === 'string';
-	const cmd = killByName ? 'pkill' : 'kill';
-	const args = [input];
+	const command = killByName ? 'pkill' : 'kill';
+	const arguments_ = [input];
 
 	if (options.force) {
-		args.unshift('-9');
+		arguments_.unshift('-9');
 	}
 
 	if (killByName && options.ignoreCase) {
-		args.unshift('-i');
+		arguments_.unshift('-i');
 	}
 
-	return execa(cmd, args);
+	return missingBinaryError(command, arguments_);
 };
 
 const defaultKill = (input, options) => {
 	const killByName = typeof input === 'string';
-	const cmd = killByName ? 'killall' : 'kill';
-	const args = [input];
+	const command = killByName ? 'killall' : 'kill';
+	const arguments_ = [input];
 
 	if (options.force) {
-		args.unshift('-9');
+		arguments_.unshift('-9');
 	}
 
 	if (killByName && options.ignoreCase) {
-		args.unshift('-I');
+		arguments_.unshift('-I');
 	}
 
-	return execa(cmd, args);
+	return missingBinaryError(command, arguments_);
 };
 
 const kill = (() => {
 	if (process.platform === 'darwin') {
-		return macOSKill;
+		return macosKill;
 	}
 
 	if (process.platform === 'win32') {
-		return winKill;
+		return windowsKill;
 	}
 
 	return defaultKill;
@@ -77,7 +91,7 @@ const parseInput = async input => {
 	return input;
 };
 
-module.exports = async (inputs, options = {}) => {
+const fkill = async (inputs, options = {}) => {
 	inputs = arrify(inputs);
 
 	const exists = await processExists.all(inputs);
@@ -107,7 +121,11 @@ module.exports = async (inputs, options = {}) => {
 		inputs.map(input => handleKill(input))
 	);
 
-	if (errors.length > 0) {
+	if (errors.length > 0 && !options.silent) {
 		throw new AggregateError(errors);
 	}
 };
+
+module.exports = fkill;
+// TODO: remove this in the next major version
+module.exports.default = fkill;
