@@ -6,12 +6,23 @@ const AggregateError = require('aggregate-error');
 const pidFromPort = require('pid-from-port');
 const processExists = require('process-exists');
 
-const winKill = (input, options) => {
-	const newInput = typeof input === 'string' ? input.concat('*') : input;
-	return taskkill(newInput, {
+const killWithTask = (input, options) => {
+	return taskkill(input, {
 		force: options.force,
 		tree: typeof options.tree === 'undefined' ? true : options.tree
 	});
+};
+
+const winKill = async (input, options) => {
+	try {
+		const firstTry = input;
+		return await killWithTask(firstTry, options);
+	} catch (error) {
+		if (typeof input === 'string') {
+			const secondTry = input.concat('.exe');
+			return killWithTask(secondTry, options);
+		}
+	}
 };
 
 const macOSKill = (input, options) => {
