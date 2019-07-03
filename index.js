@@ -7,7 +7,6 @@ const execa = require('execa');
 const AggregateError = require('aggregate-error');
 const pidFromPort = require('pid-from-port');
 const processExists = require('process-exists');
-const psList = require('ps-list');
 
 const missingBinaryError = async (command, arguments_) => {
 	try {
