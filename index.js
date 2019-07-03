@@ -1,99 +1,32 @@
 'use strict';
 const arrify = require('arrify');
 const taskkill = require('taskkill');
-const treekill = require('tree-kill');
+const pidtree = require('pidtree');
 const psList = require('ps-list');
-const execa = require('execa');
 const AggregateError = require('aggregate-error');
 const pidFromPort = require('pid-from-port');
 const processExists = require('process-exists');
 
-const missingBinaryError = async (command, arguments_) => {
-	try {
-		return await execa(command, arguments_);
-	} catch (error) {
-		if (error.code === 'ENOENT') {
-			const newError = new Error(`\`${command}\` doesn't seem to be installed and is required by fkill`);
-			newError.sourceError = error;
-			throw newError;
-		}
-
-		throw error;
-	}
-};
-
-async function getPidsFromInput(input, options) {
-	if (typeof input === 'number') {
-		return [input];
-	}
-
-	const nameRe = new RegExp(`^${input}$`, options.ignoreCase ? 'i' : '');
-
-	return (await psList())
-		.filter(ps => nameRe.test(ps.name))
-		.map(ps => ps.pid);
-}
-
-const windowsKill = (input, options) => {
-	return taskkill(input, {
+const windowsKill = (pid, options) => {
+	return taskkill(pid, {
 		force: options.force,
-		tree: typeof options.tree === 'undefined' ? true : options.tree
+		tree: options.tree
 	});
 };
 
-const macosKill = async (input, options) => {
+const defaultKill = async (pid, options) => {
+	let pids = [pid];
+
 	if (options.tree) {
-		const signal = options.force ? 'SIGKILL' : 'SIGTERM';
-		const pids = await getPidsFromInput(input, options);
-		return Promise.all(
-			pids.map(pid => treekill(pid, signal))
-		);
+		pids = await pidtree(pid, {root: true});
 	}
 
-	const killByName = typeof input === 'string';
-	const command = killByName ? 'pkill' : 'kill';
-	const arguments_ = [input];
+	const signal = options.force ? 'SIGKILL' : undefined;
 
-	if (options.force) {
-		arguments_.unshift('-9');
-	}
-
-	if (killByName && options.ignoreCase) {
-		arguments_.unshift('-i');
-	}
-
-	return missingBinaryError(command, arguments_);
-};
-
-const defaultKill = async (input, options) => {
-	if (options.tree) {
-		const signal = options.force ? 'SIGKILL' : 'SIGTERM';
-		const pids = await getPidsFromInput(input, options);
-		return Promise.all(
-			pids.map(pid => treekill(pid, signal))
-		);
-	}
-
-	const killByName = typeof input === 'string';
-	const command = killByName ? 'killall' : 'kill';
-	const arguments_ = [input];
-
-	if (options.force) {
-		arguments_.unshift('-9');
-	}
-
-	if (killByName && options.ignoreCase) {
-		arguments_.unshift('-I');
-	}
-
-	return missingBinaryError(command, arguments_);
+	pids.forEach(pid => process.kill(pid, signal));
 };
 
 const kill = (() => {
-	if (process.platform === 'darwin') {
-		return macosKill;
-	}
-
 	if (process.platform === 'win32') {
 		return windowsKill;
 	}
@@ -112,6 +45,8 @@ const parseInput = async input => {
 const fkill = async (inputs, options = {}) => {
 	inputs = arrify(inputs);
 
+	options.tree = options.tree === undefined ? true : options.tree;
+
 	const exists = await processExists.all(inputs);
 
 	const errors = [];
@@ -124,23 +59,34 @@ const fkill = async (inputs, options = {}) => {
 				return;
 			}
 
-			if (input === 'node') {
+			// Handle killall by process name
+			if (typeof input === 'string') {
 				const processes = await psList();
-				await Promise.all(processes.map(async ps => {
-					if (ps.name === 'node' && ps.pid !== process.pid) {
-						await kill(ps.pid, options);
-					}
+				const nameRe = new RegExp(`^${input}$`, options.ignoreCase ? 'i' : '');
+
+				const pids = processes
+					// Exclude itself from the list of processes to kill
+					.filter(ps => nameRe.test(ps.name) && ps.pid !== process.pid)
+					.map(ps => ps.pid);
+
+				if (pids.length === 0) {
+					errors.push(`Killing process ${input} failed: Process doesn't exist`);
+					return;
+				}
+
+				await Promise.all(pids.map(async pid => {
+					await kill(pid, options);
 				}));
+				return;
+			}
+
+			if (!exists.has(input)) {
+				errors.push(`Killing process ${input} failed: Process doesn't exist`);
 				return;
 			}
 
 			await kill(input, options);
 		} catch (error) {
-			if (!exists.get(input)) {
-				errors.push(`Killing process ${input} failed: Process doesn't exist`);
-				return;
-			}
-
 			errors.push(`Killing process ${input} failed: ${error.message.replace(/.*\n/, '').replace(/kill: \d+: /, '').trim()}`);
 		}
 	};
