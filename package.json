@@ -1,6 +1,6 @@
 {
 	"name": "fkill",
-	"version": "6.0.0",
+	"version": "6.2.0",
 	"description": "Fabulously kill processes. Cross-platform.",
 	"license": "MIT",
 	"repository": "sindresorhus/fkill",
@@ -13,7 +13,7 @@
 		"node": ">=8"
 	},
 	"scripts": {
-		"test": "xo && ava && tsd-check"
+		"test": "xo && ava && tsd"
 	},
 	"files": [
 		"index.js",
@@ -37,21 +37,21 @@
 		"terminate"
 	],
 	"dependencies": {
-		"aggregate-error": "^2.2.0",
-		"arrify": "^1.0.0",
+		"aggregate-error": "^3.0.0",
+		"arrify": "^2.0.1",
 		"execa": "^1.0.0",
-		"pid-from-port": "^1.0.0",
+		"pid-from-port": "^1.1.3",
 		"process-exists": "^3.1.0",
-		"ps-list": "6.2.0",
-		"taskkill": "^2.0.0",
-		"tree-kill": "1.2.1"
+		"ps-list": "^6.3.0",
+		"taskkill": "^3.0.0",
+		"tree-kill": "^1.2.1"
 	},
 	"devDependencies": {
-		"ava": "^1.3.1",
+		"ava": "^1.4.1",
 		"delay": "^4.1.0",
-		"get-port": "^4.2.0",
-		"noop-process": "^3.0.0",
-		"tsd-check": "^0.3.0",
+		"get-port": "^5.0.0",
+		"noop-process": "^3.1.0",
+		"tsd": "^0.7.1",
 		"xo": "^0.24.0"
 	}
 }

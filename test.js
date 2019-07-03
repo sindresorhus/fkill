@@ -74,6 +74,13 @@ test.serial('don\'t kill self', async t => {
 	Object.defineProperty(process, 'pid', {value: originalFkillPid});
 });
 
+test.serial('don\'t kill `fkill` when killing `node`', async t => {
+	const originalFkillPid = process.pid;
+	await fkill('node');
+
+	t.true(await processExists(originalFkillPid));
+});
+
 test('ignore ignore-case for pid', async t => {
 	const pid = await noopProcess();
 	await fkill(pid, {force: true, ignoreCase: true});
@@ -129,3 +136,7 @@ if (process.platform !== 'win32') {
 	// eslint-disable-next-line ava/test-ended
 	test.cb('kill all descendants tree by name', testKillDescendant, 'fkill-descen');
 }
+test('suppress errors when silent', async t => {
+	await t.notThrowsAsync(fkill(['123456', '654321'], {silent: true}));
+	await t.notThrowsAsync(fkill(['notFoundProcess'], {silent: true}));
+});

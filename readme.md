@@ -10,7 +10,7 @@
 
 [![Build Status](https://travis-ci.org/sindresorhus/fkill.svg?branch=master)](https://travis-ci.org/sindresorhus/fkill)
 
-Works on macOS, Linux, Windows.
+Works on macOS (10.13 or later), Linux, Windows.
 
 
 ## Install
@@ -53,7 +53,7 @@ To kill a port, prefix it with a colon. For example: `:8080`.
 
 #### options
 
-Type: `Object`
+Type: `object`
 
 ##### force
 
@@ -78,13 +78,15 @@ Ignore capitalization when killing a process.
 
 Note that the case is always ignored on Windows.
 
+##### silent
+
+Type: `boolean`<br>
+Default: `false`
+
+Suppress all error messages. For example: `Process doesn't exist`.
+
 
 ## Related
 
 - [fkill-cli](https://github.com/sindresorhus/fkill-cli) - CLI for this module
 - [alfred-fkill](https://github.com/SamVerschueren/alfred-fkill) - Alfred workflow for this module
-
-
-## License
-
-MIT © [Sindre Sorhus](https://sindresorhus.com)
