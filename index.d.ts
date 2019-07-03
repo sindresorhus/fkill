@@ -8,7 +8,7 @@ declare namespace fkill {
 		readonly force?: boolean;
 
 		/**
-		Kill all child processes along with the parent process. _(Windows only)_
+		Kill all child processes along with the parent process.
 
 		@default true
 		*/
