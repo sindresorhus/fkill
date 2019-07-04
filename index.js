@@ -46,6 +46,7 @@ const fkill = async (inputs, options = {}) => {
 	inputs = arrify(inputs);
 
 	options.tree = options.tree === undefined ? true : options.tree;
+	options.ignoreCase = options.ignoreCase || process.platform === 'win32';
 
 	const exists = await processExists.all(inputs);
 
@@ -65,8 +66,7 @@ const fkill = async (inputs, options = {}) => {
 				const nameRe = new RegExp(`^${input}$`, options.ignoreCase ? 'i' : '');
 
 				const pids = processes
-					// Exclude itself from the list of processes to kill
-					.filter(ps => nameRe.test(ps.name) && ps.pid !== process.pid)
+					.filter(ps => nameRe.test(ps.name))
 					.map(ps => ps.pid);
 
 				if (pids.length === 0) {
@@ -75,7 +75,9 @@ const fkill = async (inputs, options = {}) => {
 				}
 
 				await Promise.all(pids.map(async pid => {
-					await kill(pid, options);
+					if (pid !== process.pid) {
+						await kill(pid, options);
+					}
 				}));
 				return;
 			}
