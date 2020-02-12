@@ -8,7 +8,7 @@ import getPort from 'get-port';
 import fkill from '.';
 
 async function noopProcessKilled(t, pid) {
-	// Ensure the noop process has time to exit
+	// Ensure the noop process has time to exit.
 	await delay(100);
 	t.false(await processExists(pid));
 }
@@ -83,20 +83,21 @@ test.serial('don\'t kill `fkill` when killing `node`', async t => {
 test('ignore ignore-case for pid', async t => {
 	const pid = await noopProcess();
 	await fkill(pid, {force: true, ignoreCase: true});
-
 	await noopProcessKilled(t, pid);
 });
 
 test('kill from port', async t => {
 	const port = await getPort();
-	const {pid} = childProcess.spawn('node', ['fixture.js', port]);
+	const {pid} = childProcess.spawn(process.execPath, ['fixture.js', port]);
 	await fkill(pid, {force: true});
 	await noopProcessKilled(t, pid);
-	t.is(await getPort({port}), port);
 });
 
 test('error when process is not found', async t => {
-	await t.throwsAsync(fkill(['notFoundProcess']), /Killing process notFoundProcess failed: Process doesn't exist/);
+	await t.throwsAsync(
+		fkill(['notFoundProcess']),
+		{message: /Killing process notFoundProcess failed: Process doesn't exist/}
+	);
 });
 
 test('suppress errors when silent', async t => {
