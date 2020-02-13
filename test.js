@@ -75,8 +75,11 @@ test.serial('don\'t kill self', async t => {
 
 test.serial('don\'t kill `fkill` when killing `node` or `node.exe`', async t => {
 	const originalFkillPid = process.pid;
-	await fkill('node');
-	await fkill('node.exe');
+	if (process.platform === 'win32') {
+		await fkill('node.exe');
+	} else {
+		await fkill('node');
+	}
 
 	t.true(await processExists(originalFkillPid));
 });
