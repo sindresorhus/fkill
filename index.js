@@ -95,10 +95,10 @@ const fkill = async (inputs, options = {}) => {
 				return;
 			}
 
-			if (input === 'node') {
+			if (input === 'node' || input === 'node.exe') {
 				const processes = await psList();
 				await Promise.all(processes.map(async ps => {
-					if (ps.name === 'node' && ps.pid !== process.pid) {
+					if ((ps.name === 'node' || ps.name === 'node.exe') && ps.pid !== process.pid) {
 						await kill(ps.pid, options);
 					}
 				}));
