@@ -81,14 +81,17 @@ test('ignore ignore-case for pid', async t => {
 
 test('kill from port', async t => {
 	const port = await getPort();
-	const {pid} = childProcess.spawn('node', ['fixture.js', port]);
+	const {pid} = childProcess.spawn(process.execPath, ['fixture.js', port]);
 	await fkill(pid, {force: true});
 	t.false(await processExists(pid));
 	t.is(await getPort({port}), port);
 });
 
 test('error when process is not found', async t => {
-	await t.throwsAsync(fkill(['notFoundProcess']), /Killing process notFoundProcess failed: Process doesn't exist/);
+	await t.throwsAsync(
+		fkill(['notFoundProcess']),
+		{message: /Killing process notFoundProcess failed: Process doesn't exist/}
+	);
 });
 
 test('suppress errors when silent', async t => {

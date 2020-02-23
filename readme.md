@@ -12,13 +12,11 @@
 
 Works on macOS (10.13 or later), Linux, Windows.
 
-
 ## Install
 
 ```
 $ npm install fkill
 ```
-
 
 ## Usage
 
@@ -36,10 +34,9 @@ fkill(':8080');
 fkill([1337, 'Safari', ':8080']);
 ```
 
-
 ## API
 
-### fkill(input, [options])
+### fkill(input, options?)
 
 Returns a promise that resolves when the process is killed.
 
@@ -57,21 +54,21 @@ Type: `object`
 
 ##### force
 
-Type: `boolean`<br>
+Type: `boolean`\
 Default: `false`
 
 Force kill the process.
 
 ##### tree
 
-Type: `boolean`<br>
+Type: `boolean`\
 Default: `true`
 
 Kill all child processes along with the parent process. *(Windows only)*
 
 ##### ignoreCase
 
-Type: `boolean`<br>
+Type: `boolean`\
 Default: `false`
 
 Ignore capitalization when killing a process.
@@ -80,11 +77,10 @@ Note that the case is always ignored on Windows.
 
 ##### silent
 
-Type: `boolean`<br>
+Type: `boolean`\
 Default: `false`
 
 Suppress all error messages. For example: `Process doesn't exist`.
-
 
 ## Related
 

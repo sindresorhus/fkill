@@ -121,23 +121,15 @@ const fkill = async (inputs, options = {}) => {
 				const processes = await psList();
 				await Promise.all(processes.map(async ps => {
 					if (ps.name === 'node' && ps.pid !== process.pid) {
-						try {
-							await kill(ps.pid, options);
-							await killChecker(ps.pid);
-						} catch (error) {
-							throw error;
-						}
+						await kill(ps.pid, options);
+						await killChecker(ps.pid);
 					}
 				}));
 				return;
 			}
 
-			try {
-				await kill(input, options);
-				await killChecker(input);
-			} catch (error) {
-				throw error;
-			}
+			await kill(input, options);
+			await killChecker(input);
 		} catch (error) {
 			if (!exists.get(input)) {
 				errors.push(`Killing process ${input} failed: Process doesn't exist`);
@@ -158,5 +150,3 @@ const fkill = async (inputs, options = {}) => {
 };
 
 module.exports = fkill;
-// TODO: remove this in the next major version
-module.exports.default = fkill;
