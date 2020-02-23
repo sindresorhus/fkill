@@ -48,7 +48,7 @@
 	},
 	"devDependencies": {
 		"ava": "^1.4.1",
-		"get-port": "~5.0.0",
+		"get-port": "^5.1.1",
 		"noop-process": "^4.0.0",
 		"tsd": "^0.11.0",
 		"xo": "^0.25.4"

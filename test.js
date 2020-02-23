@@ -84,7 +84,6 @@ test('kill from port', async t => {
 	const {pid} = childProcess.spawn(process.execPath, ['fixture.js', port]);
 	await fkill(pid, {force: true});
 	t.false(await processExists(pid));
-	t.is(await getPort({port}), port);
 });
 
 test('error when process is not found', async t => {
