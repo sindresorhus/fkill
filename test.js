@@ -97,3 +97,22 @@ test('suppress errors when silent', async t => {
 	await t.notThrowsAsync(fkill(['123456', '654321'], {silent: true}));
 	await t.notThrowsAsync(fkill(['notFoundProcess'], {silent: true}));
 });
+
+test('force works properly for process ignoring SIGTERM', async t => {
+	const {pid} = childProcess.spawn(process.execPath, ['fixture-ignore-sigterm.js']);
+	await fkill(pid, {});
+	await delay(100);
+	t.true(await processExists(pid));
+	await fkill(pid, {force: true});
+	await noopProcessKilled(t, pid);
+});
+
+test('forceAfterTimeout works properly for process ignoring SIGTERM', async t => {
+	const {pid} = childProcess.spawn(process.execPath, ['fixture-ignore-sigterm.js']);
+	const promise = fkill(pid, {forceAfterTimeout: 100});
+	t.true(await processExists(pid));
+	await delay(50);
+	t.true(await processExists(pid));
+	await promise;
+	await noopProcessKilled(t, pid);
+});
