@@ -26,11 +26,17 @@ const missingBinaryError = async (command, arguments_) => {
 	}
 };
 
-const windowsKill = (input, options) => {
-	return taskkill(input, {
-		force: options.force,
-		tree: typeof options.tree === 'undefined' ? true : options.tree
-	});
+const windowsKill = async (input, options) => {
+	try {
+		return await taskkill(input, {
+			force: options.force,
+			tree: typeof options.tree === 'undefined' ? true : options.tree
+		});
+	} catch (error) {
+		if (!options.force && error.exitCode !== 255) { // Indicates process filters SIGTERM
+			throw error;
+		}
+	}
 };
 
 const macosKill = (input, options) => {
