@@ -59,6 +59,13 @@ Default: `false`
 
 Force kill the process.
 
+##### forceTimeout
+
+Type: `number`\
+Default: `undefined`
+
+If not force killing, wait up to `forceTimeout` number of milliseconds for process(es) to exit, then force kill the ones which didn't.
+
 ##### tree
 
 Type: `boolean`\

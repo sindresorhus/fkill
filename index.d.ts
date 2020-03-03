@@ -8,6 +8,12 @@ declare namespace fkill {
 		readonly force?: boolean;
 
 		/**
+		If not force killing, wait up to `forceTimeout` number of milliseconds for process(es) to exit, then force kill the ones which didn't.
+		@default undefined
+		*/
+		readonly forceTimeout?: number;
+
+		/**
 		Kill all child processes along with the parent process. _(Windows only)_
 
 		@default true
