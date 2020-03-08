@@ -9,6 +9,7 @@ declare namespace fkill {
 
 		/**
 		If not force killing, wait up to `forceTimeout` number of milliseconds for process(es) to exit, then force kill the ones which didn't.
+
 		@default undefined
 		*/
 		readonly forceTimeout?: number;
