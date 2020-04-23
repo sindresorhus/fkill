@@ -82,6 +82,20 @@ Default: `false`
 
 Suppress all error messages. For example: `Process doesn't exist`.
 
+##### verify
+
+Type: `boolean`\
+Default: `true`
+
+Perform a rigorous check that the process is no longer visible to the system before returning.
+
+##### verifyTimeout
+
+Type: `number`\
+Default: `2`
+
+Number of seconds to spend verifying the process is no longer visible before returning anyway.
+
 ## Related
 
 - [fkill-cli](https://github.com/sindresorhus/fkill-cli) - CLI for this module

@@ -3,6 +3,7 @@ import childProcess from 'child_process';
 import test from 'ava';
 import noopProcess from 'noop-process';
 import processExists from 'process-exists';
+import proxyquire from 'proxyquire';
 import getPort from 'get-port';
 import fkill from '.';
 
@@ -10,6 +11,30 @@ test('pid', async t => {
 	const pid = await noopProcess();
 	await fkill(pid, {force: true});
 	t.false(await processExists(pid));
+});
+
+test.serial('attempt no extra verification checks when disabled', async t => {
+	let count = 0;
+	const pid = await noopProcess();
+	const processExistsStub = () => {
+		count++;
+		return true;
+	};
+
+	const fkillProxy = proxyquire('.', {'process-exists': processExistsStub});
+	await fkillProxy(pid, {verify: false, force: true});
+	t.true(count === 0);
+});
+
+test.serial('don\'t kill self', async t => {
+	const originalFkillPid = process.pid;
+	const pid = await noopProcess();
+	Object.defineProperty(process, 'pid', {value: pid});
+
+	await fkill(process.pid);
+
+	t.true(await processExists(pid));
+	Object.defineProperty(process, 'pid', {value: originalFkillPid});
 });
 
 if (process.platform === 'win32') {
@@ -54,15 +79,17 @@ test('fail', async t => {
 	t.regex(error.message, /654321/);
 });
 
-test.serial('don\'t kill self', async t => {
-	const originalFkillPid = process.pid;
+test.serial('attempt verification for 1 second before returning', async t => {
+	let count = 0;
 	const pid = await noopProcess();
-	Object.defineProperty(process, 'pid', {value: pid});
+	const processExistsStub = () => {
+		count++;
+		return true;
+	};
 
-	await fkill(process.pid);
-
-	t.true(await processExists(pid));
-	Object.defineProperty(process, 'pid', {value: originalFkillPid});
+	const fkillProxy = proxyquire('.', {'process-exists': processExistsStub});
+	await fkillProxy(pid, {verifyTimeout: 1, force: true});
+	t.true(count === 10);
 });
 
 test.serial('don\'t kill `fkill` when killing `node`', async t => {

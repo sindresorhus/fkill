@@ -80,26 +80,30 @@ const parseInput = async input => {
 	return input;
 };
 
-const killChecker = async input => {
-	let i = 0;
+const killChecker = (input, options) => {
+	if (typeof options.verify !== 'undefined' && options.verify === false) {
+		return;
+	}
 
-	return new Promise(resolve => {
-		const checker = setInterval(async () => {
-			i++;
-			const exists = await processExists(input);
+	const seconds = options.verifyTimeout || 2;
+	let checks = seconds * 10;
 
-			if (!exists) {
-				resolve();
-				clearInterval(checker);
-			}
+	function timeout() {
+		return new Promise(resolve => setTimeout(resolve));
+	}
 
-			// Give up after 2 seconds
-			if (i === 20) {
-				resolve();
-				clearInterval(checker);
-			}
-		}, 100);
-	});
+	async function checker() {
+		checks--;
+
+		const exists = await processExists(input);
+
+		if (exists && checks > 0) {
+			timeout();
+			await checker();
+		}
+	}
+
+	return checker();
 };
 
 const fkill = async (inputs, options = {}) => {
@@ -122,14 +126,14 @@ const fkill = async (inputs, options = {}) => {
 				await Promise.all(processes.map(async ps => {
 					if (ps.name === 'node' && ps.pid !== process.pid) {
 						await kill(ps.pid, options);
-						await killChecker(ps.pid);
+						await killChecker(ps.pid, options);
 					}
 				}));
 				return;
 			}
 
 			await kill(input, options);
-			await killChecker(input);
+			await killChecker(input, options);
 		} catch (error) {
 			if (!exists.get(input)) {
 				errors.push(`Killing process ${input} failed: Process doesn't exist`);

@@ -22,6 +22,27 @@ declare namespace fkill {
 		@default false
 		*/
 		readonly ignoreCase?: boolean;
+
+		/**
+		Suppress all error messages. For example: `Process doesn't exist`.
+
+		@default false
+		*/
+		readonly silent?: boolean;
+
+		/**
+		Perform a rigorous check that the process is no longer visible to the system before returning.
+
+		@default true
+		*/
+		readonly verify?: boolean;
+
+		/**
+		Number of seconds to spend verifying the process is no longer visible before returning anyway.
+
+		@default 2
+		*/
+		readonly verifyTimeout?: number;
 	}
 }
 
