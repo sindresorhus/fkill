@@ -34,7 +34,11 @@ const macosKill = (input, options) => {
 	const arguments_ = [input];
 
 	if (options.force) {
-		arguments_.unshift('-9');
+		if (killByName) {
+			arguments_.unshift('-KILL');
+		} else {
+			arguments_.unshift('-9');
+		}
 	}
 
 	if (killByName && options.ignoreCase) {
