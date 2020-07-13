@@ -111,7 +111,7 @@ const fkill = async (inputs, options = {}) => {
 				const processes = await psList();
 				const pids = getCurrentProcessParentsPID(processes);
 				await Promise.all(processes.map(async ps => {
-					if ((ps.name === 'node' || ps.name === 'node.exe') && !pids.includes(process.id)) {
+					if ((ps.name === 'node' || ps.name === 'node.exe') && !pids.includes(process.pid)) {
 						await kill(ps.pid, options);
 					}
 				}));
