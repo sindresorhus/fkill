@@ -5,6 +5,7 @@ import noopProcess from 'noop-process';
 import processExists from 'process-exists';
 import delay from 'delay';
 import getPort from 'get-port';
+import execa from 'execa';
 import fkill from '.';
 
 async function noopProcessKilled(t, pid) {
@@ -74,14 +75,8 @@ test.serial('don\'t kill self', async t => {
 });
 
 test.serial('don\'t kill `fkill` when killing `node` or `node.exe`', async t => {
-	const originalFkillPid = process.pid;
-	if (process.platform === 'win32') {
-		await fkill('node.exe');
-	} else {
-		await fkill('node');
-	}
-
-	t.true(await processExists(originalFkillPid));
+	const result = await execa('node', ['./fixture2.js'], {detached: true});
+	t.is(result.exitCode, 0);
 });
 
 test('ignore ignore-case for pid', async t => {
