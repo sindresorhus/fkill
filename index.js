@@ -80,6 +80,18 @@ const parseInput = async input => {
 	return input;
 };
 
+const getCurrentProcessParentsPID = processes => {
+	const processMap = new Map(processes.map(ps => [ps.pid, ps.ppid]));
+	const pids = [];
+	let currentId = process.pid;
+	while (currentId) {
+		pids.push(currentId);
+		currentId = processMap.get(currentId);
+	}
+
+	return pids;
+};
+
 const fkill = async (inputs, options = {}) => {
 	inputs = arrify(inputs);
 
@@ -97,8 +109,9 @@ const fkill = async (inputs, options = {}) => {
 
 			if (input === 'node' || input === 'node.exe') {
 				const processes = await psList();
+				const pids = getCurrentProcessParentsPID(processes);
 				await Promise.all(processes.map(async ps => {
-					if ((ps.name === 'node' || ps.name === 'node.exe') && ps.pid !== process.pid) {
+					if ((ps.name === 'node' || ps.name === 'node.exe') && !pids.includes(process.id)) {
 						await kill(ps.pid, options);
 					}
 				}));
