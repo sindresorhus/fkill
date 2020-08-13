@@ -48,12 +48,12 @@ if (process.platform === 'win32') {
 		const pid = await noopProcess();
 		await fkill(pid, {force: true});
 		await noopProcessKilled(t, pid);
-		
+
 		const error = await t.throwsAsync(fkill(pid, {force: true}));
 		const regex = new RegExp(pid);
 		t.regex(error.message, regex);
 	});
-	
+
 	test.serial('win default ignore case', async t => {
 		const title = 'notepad.exe';
 		const {pid} = childProcess.spawn(title);
