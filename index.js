@@ -35,6 +35,7 @@ const windowsKill = async (input, options) => {
 		if (typeof input === 'string') {
 			return killWithTaskkill(input.concat('.exe'), options);
 		}
+		
 		throw error;
 	}
 };
