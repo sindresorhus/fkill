@@ -21,11 +21,22 @@ const missingBinaryError = async (command, arguments_) => {
 	}
 };
 
-const windowsKill = (input, options) => {
+const killWithTaskkill = (input, options) => {
 	return taskkill(input, {
 		force: options.force,
 		tree: typeof options.tree === 'undefined' ? true : options.tree
 	});
+};
+
+const windowsKill = async (input, options) => {
+	try {
+		return await killWithTaskkill(input, options);
+	} catch (error) {
+		if (typeof input === 'string') {
+			return killWithTaskkill(input.concat('.exe'), options);
+		}
+		throw error;
+	}
 };
 
 const macosKill = (input, options) => {
