@@ -29,6 +29,31 @@ if (process.platform === 'win32') {
 		t.false(await processExists(pid));
 	});
 
+	test.serial('window - supports extension-less process name', async t => {
+		const title = 'notepad.exe';
+		const {pid} = childProcess.spawn(title);
+
+		await fkill('notepad', {force: true});
+
+		t.false(await processExists(pid));
+	});
+
+	test.serial('windows - for killing based on integer instead of string', async t => {
+		const pid = await noopProcess();
+		await fkill(pid, {force: true});
+		await noopProcessKilled(t, pid);
+	});
+
+	test.serial('windows - expect an error if process integer does not exist', async t => {
+		const pid = await noopProcess();
+		await fkill(pid, {force: true});
+		await noopProcessKilled(t, pid);
+		
+		const error = await t.throwsAsync(fkill(pid, {force: true}));
+		const regex = new RegExp(pid);
+		t.regex(error.message, regex);
+	});
+	
 	test.serial('win default ignore case', async t => {
 		const title = 'notepad.exe';
 		const {pid} = childProcess.spawn(title);
