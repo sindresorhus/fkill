@@ -45,7 +45,7 @@ const fkill = require('fkill');
 
 if (process.platform === 'win32') {
 	fkill('notepad');
-	console.log('Killed notepad.exe');
+	console.log('Killed notepad.exe process');
 }
 ```
 
