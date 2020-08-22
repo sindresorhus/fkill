@@ -32,7 +32,7 @@ const windowsKill = async (input, options) => {
 	try {
 		return await killWithTaskkill(input, options);
 	} catch (error) {
-		if (typeof input === 'string') {
+		if (typeof input === 'string' && !input.endsWith('.exe')) {
 			return killWithTaskkill(input.concat('.exe'), options);
 		}
 
