@@ -20,7 +20,6 @@ $ npm install fkill
 
 ## Usage
 
-### Common
 ```js
 const fkill = require('fkill');
 
@@ -35,20 +34,6 @@ fkill(':8080');
 fkill([1337, 'Safari', ':8080']);
 ```
 
-### OS Specific
-
-#### Windows
-
-When a string is provided, the method will try to kill a process by name. If it doesn't succeed, it will try to append `.exe`.
-```js
-const fkill = require('fkill');
-
-if (process.platform === 'win32') {
-	fkill('notepad');
-	console.log('Killed notepad.exe process');
-}
-```
-
 ## API
 
 ### fkill(input, options?)
@@ -59,7 +44,7 @@ Returns a promise that resolves when the process is killed.
 
 Type: `number | string | Array<number | string>`
 
-One or more process IDs/names/ports to kill.
+One or more process IDs/names/ports to kill. **NOTE:** You can optionally choose to provide binaries extensions on windows.
 
 To kill a port, prefix it with a colon. For example: `:8080`.
 
