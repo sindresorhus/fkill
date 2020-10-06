@@ -73,13 +73,6 @@ test.serial('don\'t kill self', async t => {
 	Object.defineProperty(process, 'pid', {value: originalFkillPid});
 });
 
-test.serial('don\'t kill `fkill` when killing `node`', async t => {
-	const originalFkillPid = process.pid;
-	await fkill('node');
-
-	t.true(await processExists(originalFkillPid));
-});
-
 test('ignore ignore-case for pid', async t => {
 	const pid = await noopProcess();
 	await fkill(pid, {force: true, ignoreCase: true});
