@@ -1,9 +1,11 @@
 {
 	"name": "fkill",
-	"version": "7.0.1",
+	"version": "7.1.0",
 	"description": "Fabulously kill processes. Cross-platform.",
 	"license": "MIT",
-	"funding": "https://github.com/sponsors/sindresorhus",
+	"funding": {
+		"url": "https://github.com/sponsors/sindresorhus"
+	},
 	"repository": "sindresorhus/fkill",
 	"author": {
 		"name": "Sindre Sorhus",
