@@ -3,7 +3,7 @@ const arrify = require('arrify');
 const taskkill = require('taskkill');
 const execa = require('execa');
 const AggregateError = require('aggregate-error');
-const pidFromPort = require('pid-from-port');
+const pidPort = require('pid-port');
 const processExists = require('process-exists');
 const psList = require('ps-list');
 
@@ -78,7 +78,7 @@ const kill = (() => {
 
 const parseInput = async input => {
 	if (typeof input === 'string' && input[0] === ':') {
-		return pidFromPort(parseInt(input.slice(1), 10));
+		return pidPort.portToPid(Number.parseInt(input.slice(1), 10));
 	}
 
 	return input;

@@ -48,6 +48,6 @@ fkill([1337, 'Safari', ':8080']);
 declare function fkill(
 	input: number | string | ReadonlyArray<string | number>,
 	options?: fkill.Options
-): Promise<void>
+): Promise<void>;
 
 export = fkill;
