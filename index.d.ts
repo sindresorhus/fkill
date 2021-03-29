@@ -22,6 +22,13 @@ declare namespace fkill {
 		@default false
 		*/
 		readonly ignoreCase?: boolean;
+
+		/**
+		Suppress all error messages. For example: `Process doesn't exist`.
+
+		@default false
+		*/
+		readonly silent?: boolean;
 	}
 }
 
