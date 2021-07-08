@@ -73,13 +73,6 @@ test.serial('don\'t kill self', async t => {
 	Object.defineProperty(process, 'pid', {value: originalFkillPid});
 });
 
-test.serial('don\'t kill `fkill` when killing `node`', async t => {
-	const originalFkillPid = process.pid;
-	await fkill('node');
-
-	t.true(await processExists(originalFkillPid));
-});
-
 test('ignore ignore-case for pid', async t => {
 	const pid = await noopProcess();
 	await fkill(pid, {force: true, ignoreCase: true});
@@ -103,4 +96,23 @@ test('error when process is not found', async t => {
 test('suppress errors when silent', async t => {
 	await t.notThrowsAsync(fkill(['123456', '654321'], {silent: true}));
 	await t.notThrowsAsync(fkill(['notFoundProcess'], {silent: true}));
+});
+
+test('force works properly for process ignoring SIGTERM', async t => {
+	const {pid} = childProcess.spawn(process.execPath, ['fixture-ignore-sigterm.js']);
+	await fkill(pid, {});
+	await delay(100);
+	t.true(await processExists(pid));
+	await fkill(pid, {force: true});
+	await noopProcessKilled(t, pid);
+});
+
+test('forceAfterTimeout works properly for process ignoring SIGTERM', async t => {
+	const {pid} = childProcess.spawn(process.execPath, ['fixture-ignore-sigterm.js']);
+	const promise = fkill(pid, {forceAfterTimeout: 100});
+	t.true(await processExists(pid));
+	await delay(50);
+	t.true(await processExists(pid));
+	await promise;
+	await noopProcessKilled(t, pid);
 });
