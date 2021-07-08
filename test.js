@@ -1,4 +1,3 @@
-/* eslint-disable ava/no-identical-title */
 import childProcess from 'child_process';
 import test from 'ava';
 import noopProcess from 'noop-process';
@@ -6,6 +5,10 @@ import processExists from 'process-exists';
 import delay from 'delay';
 import getPort from 'get-port';
 import fkill from '.';
+
+const testRequiringNoopProcessToSetTitleProperly = () => {
+	return (process.versions.node.split('.')[0] === '12') ? test.skip : test;
+};
 
 async function noopProcessKilled(t, pid) {
 	// Ensure the noop process has time to exit.
@@ -38,7 +41,7 @@ if (process.platform === 'win32') {
 		t.false(await processExists(pid));
 	});
 } else {
-	test('title', async t => {
+	testRequiringNoopProcessToSetTitleProperly()('title', async t => {
 		const title = 'fkill-test';
 		const pid = await noopProcess({title});
 
@@ -47,7 +50,7 @@ if (process.platform === 'win32') {
 		await noopProcessKilled(t, pid);
 	});
 
-	test('ignore case', async t => {
+	testRequiringNoopProcessToSetTitleProperly()('ignore case', async t => {
 		const pid = await noopProcess({title: 'Capitalized'});
 		await fkill('capitalized', {ignoreCase: true});
 
