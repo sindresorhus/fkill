@@ -7,8 +7,8 @@ const pidPort = require('pid-port');
 const processExists = require('process-exists');
 const psList = require('ps-list');
 
-// If we check too soon we're unlikely to see process killed so we essentially wait 3*ALIVE_CHECK_MIN_INTERVAL before second check while producing unnecessary load
-// Primitive tests show that for process which just die on kill on a system without much load we can usually see process die in 5 ms.
+// If we check too soon, we're unlikely to see process killed so we essentially wait 3*ALIVE_CHECK_MIN_INTERVAL before the second check while producing unnecessary load.
+// Primitive tests show that for a process which just dies on kill on a system without much load, we can usually see the process die in 5 ms.
 // Checking once a second creates low enough load to not bother increasing maximum interval further, 1280 as first x to satisfy 2^^x * ALIVE_CHECK_MIN_INTERVAL > 1000.
 const ALIVE_CHECK_MIN_INTERVAL = 5;
 const ALIVE_CHECK_MAX_INTERVAL = 1280;
