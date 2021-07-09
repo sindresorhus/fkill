@@ -1,14 +1,14 @@
 declare namespace fkill {
 	interface Options {
 		/**
-		Force kill the process.
+		Force kill the processes.
 
 		@default false
 		*/
 		readonly force?: boolean;
 
 		/**
-		If not force killing, wait up to `forceAfterTimeout` number of milliseconds for process(es) to exit, then force kill the ones which didn't.
+		Force kill processes that did not exit within the given number of milliseconds.
 
 		@default undefined
 		*/
