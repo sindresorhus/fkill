@@ -40,9 +40,11 @@ const windowsKill = async (input, options) => {
 			tree: typeof options.tree === 'undefined' ? true : options.tree
 		});
 	} catch (error) {
-		if (!options.force && error.exitCode !== TASKKILL_EXIT_CODE_FOR_PROCESS_FILTERING_SIGTERM) {
-			throw error;
+		if (error.exitCode === TASKKILL_EXIT_CODE_FOR_PROCESS_FILTERING_SIGTERM && !options.force) {
+			return;
 		}
+
+		throw error;
 	}
 };
 
