@@ -96,6 +96,13 @@ test('error when process is not found', async t => {
 	);
 });
 
+test('error when process is not found (force: true)', async t => {
+	await t.throwsAsync(
+		fkill(['notFoundProcess'], {force: true}),
+		{message: /Killing process notFoundProcess failed: Process doesn't exist/}
+	);
+});
+
 test('suppress errors when silent', async t => {
 	await t.notThrowsAsync(fkill(['123456', '654321'], {silent: true}));
 	await t.notThrowsAsync(fkill(['notFoundProcess'], {silent: true}));
