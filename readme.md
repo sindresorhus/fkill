@@ -36,7 +36,7 @@ fkill([1337, 'Safari', ':8080']);
 
 ### fkill(input, options?)
 
-Returns a promise that resolves when the process is killed.
+Returns a promise that resolves when the processes are killed.
 
 #### input
 
@@ -55,7 +55,14 @@ Type: `object`
 Type: `boolean`\
 Default: `false`
 
-Force kill the process.
+Force kill the processes.
+
+##### forceAfterTimeout
+
+Type: `number`\
+Default: `undefined`
+
+Force kill processes that did not exit within the given number of milliseconds.
 
 ##### tree
 

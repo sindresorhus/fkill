@@ -1,11 +1,18 @@
 declare namespace fkill {
 	interface Options {
 		/**
-		Force kill the process.
+		Force kill the processes.
 
 		@default false
 		*/
 		readonly force?: boolean;
+
+		/**
+		Force kill processes that did not exit within the given number of milliseconds.
+
+		@default undefined
+		*/
+		readonly forceAfterTimeout?: number;
 
 		/**
 		Kill all child processes along with the parent process. _(Windows only)_
