@@ -1,14 +1,13 @@
-import childProcess from 'child_process';
+import process from 'node:process';
+import childProcess from 'node:child_process';
 import test from 'ava';
 import noopProcess from 'noop-process';
 import processExists from 'process-exists';
 import delay from 'delay';
 import getPort from 'get-port';
-import fkill from '.';
+import fkill from './index.js';
 
-const testRequiringNoopProcessToSetTitleProperly = () => {
-	return (process.versions.node.split('.')[0] === '12') ? test.skip : test;
-};
+const testRequiringNoopProcessToSetTitleProperly = () => (process.versions.node.split('.')[0] === '12') ? test.skip : test;
 
 async function noopProcessKilled(t, pid) {
 	// Ensure the noop process has time to exit.
@@ -92,14 +91,14 @@ test('kill from port', async t => {
 test('error when process is not found', async t => {
 	await t.throwsAsync(
 		fkill(['notFoundProcess']),
-		{message: /Killing process notFoundProcess failed: Process doesn't exist/}
+		{message: /Killing process notFoundProcess failed: Process doesn't exist/},
 	);
 });
 
 test('error when process is not found (force: true)', async t => {
 	await t.throwsAsync(
 		fkill(['notFoundProcess'], {force: true}),
-		{message: /Killing process notFoundProcess failed: Process doesn't exist/}
+		{message: /Killing process notFoundProcess failed: Process doesn't exist/},
 	);
 });
 

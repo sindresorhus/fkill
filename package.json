@@ -3,17 +3,17 @@
 	"version": "7.2.1",
 	"description": "Fabulously kill processes. Cross-platform.",
 	"license": "MIT",
-	"funding": {
-		"url": "https://github.com/sponsors/sindresorhus"
-	},
 	"repository": "sindresorhus/fkill",
+	"funding": "https://github.com/sponsors/sindresorhus",
 	"author": {
 		"name": "Sindre Sorhus",
 		"email": "sindresorhus@gmail.com",
 		"url": "https://sindresorhus.com"
 	},
+	"type": "module",
+	"exports": "./index.js",
 	"engines": {
-		"node": ">=10"
+		"node": "^12.20.0 || ^14.13.1 || >=16.0.0"
 	},
 	"scripts": {
 		"test": "xo && ava && tsd"
@@ -40,20 +40,19 @@
 		"terminate"
 	],
 	"dependencies": {
-		"aggregate-error": "^3.1.0",
-		"arrify": "^2.0.1",
-		"execa": "^5.0.0",
-		"pid-port": "^0.1.0",
-		"process-exists": "^4.0.0",
+		"aggregate-error": "^4.0.0",
+		"execa": "^5.1.1",
+		"pid-port": "^0.2.0",
+		"process-exists": "^4.1.0",
 		"ps-list": "^7.2.0",
-		"taskkill": "^3.1.0"
+		"taskkill": "^4.0.0"
 	},
 	"devDependencies": {
-		"ava": "^2.4.0",
-		"delay": "^4.4.0",
-		"get-port": "^5.1.1",
-		"noop-process": "^4.0.0",
-		"tsd": "^0.14.0",
-		"xo": "^0.36.1"
+		"ava": "^3.15.0",
+		"delay": "^5.0.0",
+		"get-port": "^6.0.0",
+		"noop-process": "^5.0.0",
+		"tsd": "^0.18.0",
+		"xo": "^0.45.0"
 	}
 }

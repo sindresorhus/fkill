@@ -12,19 +12,17 @@ Works on macOS (10.13 or later), Linux, Windows.
 
 ## Install
 
-```
-$ npm install fkill
+```sh
+npm install fkill
 ```
 
 ## Usage
 
 ```js
-const fkill = require('fkill');
+import fkill from 'fkill';
 
-(async () => {
-	await fkill(1337);
-	console.log('Killed process');
-})();
+await fkill(1337);
+console.log('Killed process');
 
 fkill('Safari');
 fkill(':8080');

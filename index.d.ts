@@ -1,42 +1,40 @@
-declare namespace fkill {
-	interface Options {
-		/**
-		Force kill the processes.
+export interface Options {
+	/**
+	Force kill the processes.
 
-		@default false
-		*/
-		readonly force?: boolean;
+	@default false
+	*/
+	readonly force?: boolean;
 
-		/**
-		Force kill processes that did not exit within the given number of milliseconds.
+	/**
+	Force kill processes that did not exit within the given number of milliseconds.
 
-		@default undefined
-		*/
-		readonly forceAfterTimeout?: number;
+	@default undefined
+	*/
+	readonly forceAfterTimeout?: number;
 
-		/**
-		Kill all child processes along with the parent process. _(Windows only)_
+	/**
+	Kill all child processes along with the parent process. _(Windows only)_
 
-		@default true
-		*/
-		readonly tree?: boolean;
+	@default true
+	*/
+	readonly tree?: boolean;
 
-		/**
-		Ignore capitalization when killing a process.
+	/**
+	Ignore capitalization when killing a process.
 
-		Note that the case is always ignored on Windows.
+	Note that the case is always ignored on Windows.
 
-		@default false
-		*/
-		readonly ignoreCase?: boolean;
+	@default false
+	*/
+	readonly ignoreCase?: boolean;
 
-		/**
-		Suppress all error messages. For example: `Process doesn't exist`.
+	/**
+	Suppress all error messages. For example: `Process doesn't exist`.
 
-		@default false
-		*/
-		readonly silent?: boolean;
-	}
+	@default false
+	*/
+	readonly silent?: boolean;
 }
 
 /**
@@ -46,12 +44,10 @@ Fabulously kill processes. Cross-platform.
 
 @example
 ```
-import fkill = require('fkill');
+import fkill from 'fkill';
 
-(async () => {
-	await fkill(1337);
-	console.log('Killed process');
-})();
+await fkill(1337);
+console.log('Killed process');
 
 fkill('Safari');
 fkill(':8080');
@@ -59,9 +55,7 @@ fkill(':8080');
 fkill([1337, 'Safari', ':8080']);
 ```
 */
-declare function fkill(
+export default function fkill(
 	input: number | string | ReadonlyArray<string | number>,
-	options?: fkill.Options
+	options?: Options
 ): Promise<void>;
-
-export = fkill;

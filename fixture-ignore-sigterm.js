@@ -1,2 +1,4 @@
+import process from 'node:process';
+
 process.on('SIGTERM', () => {});
-setInterval(() => {}, 10000);
+setInterval(() => {}, 10_000);

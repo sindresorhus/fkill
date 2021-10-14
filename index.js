@@ -1,11 +1,10 @@
-'use strict';
-const arrify = require('arrify');
-const taskkill = require('taskkill');
-const execa = require('execa');
-const AggregateError = require('aggregate-error');
-const pidPort = require('pid-port');
-const processExists = require('process-exists');
-const psList = require('ps-list');
+import process from 'node:process';
+import taskkill from 'taskkill';
+import execa from 'execa';
+import AggregateError from 'aggregate-error';
+import {portToPid} from 'pid-port';
+import processExists from 'process-exists';
+import psList from 'ps-list';
 
 // If we check too soon, we're unlikely to see process killed so we essentially wait 3*ALIVE_CHECK_MIN_INTERVAL before the second check while producing unnecessary load.
 // Primitive tests show that for a process which just dies on kill on a system without much load, we can usually see the process die in 5 ms.
@@ -37,7 +36,7 @@ const windowsKill = async (input, options) => {
 	try {
 		return await taskkill(input, {
 			force: options.force,
-			tree: typeof options.tree === 'undefined' ? true : options.tree
+			tree: typeof options.tree === 'undefined' ? true : options.tree,
 		});
 	} catch (error) {
 		if (error.exitCode === TASKKILL_EXIT_CODE_FOR_PROCESS_FILTERING_SIGTERM && !options.force) {
@@ -98,7 +97,7 @@ const kill = (() => {
 
 const parseInput = async input => {
 	if (typeof input === 'string' && input[0] === ':') {
-		return pidPort.portToPid(Number.parseInt(input.slice(1), 10));
+		return portToPid(Number.parseInt(input.slice(1), 10));
 	}
 
 	return input;
@@ -124,8 +123,8 @@ const killWithLimits = async (input, options) => {
 	await kill(input, options);
 };
 
-const fkill = async (inputs, options = {}) => {
-	inputs = arrify(inputs);
+export default async function fkill(inputs, options = {}) {
+	inputs = [inputs].flat();
 
 	const exists = await processExists.all(inputs);
 
@@ -144,9 +143,7 @@ const fkill = async (inputs, options = {}) => {
 		}
 	};
 
-	await Promise.all(
-		inputs.map(input => handleKill(input))
-	);
+	await Promise.all(inputs.map(input => handleKill(input)));
 
 	if (errors.length > 0 && !options.silent) {
 		throw new AggregateError(errors);
@@ -183,6 +180,4 @@ const fkill = async (inputs, options = {}) => {
 			}));
 		}
 	}
-};
-
-module.exports = fkill;
+}
