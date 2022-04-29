@@ -55,6 +55,18 @@ if (process.platform === 'win32') {
 
 		await noopProcessKilled(t, pid);
 	});
+
+	testRequiringNoopProcessToSetTitleProperly()('exact match', async t => {
+		const title = 'foo-bar';
+		const pid = await noopProcess({title});
+
+		await t.throwsAsync(fkill('foo'), {message: /Process doesn't exist/});
+
+		t.true(await processExists(pid));
+
+		// Cleanup
+		await fkill(title);
+	});
 }
 
 test('fail', async t => {

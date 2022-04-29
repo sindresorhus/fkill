@@ -64,6 +64,10 @@ const macosKill = (input, options) => {
 		arguments_.unshift('-i');
 	}
 
+	if (killByName) {
+		arguments_.unshift('-x');
+	}
+
 	return missingBinaryError(command, arguments_);
 };
 
