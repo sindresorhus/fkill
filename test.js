@@ -5,6 +5,7 @@ import noopProcess from 'noop-process';
 import processExists from 'process-exists';
 import delay from 'delay';
 import getPort from 'get-port';
+import execa from 'execa';
 import fkill from './index.js';
 
 const testRequiringNoopProcessToSetTitleProperly = () => (process.versions.node.split('.')[0] === '12') ? test.skip : test;
@@ -85,6 +86,11 @@ test.serial('don\'t kill self', async t => {
 	await delay(noopProcessKilled(t, pid));
 	t.true(await processExists(pid));
 	Object.defineProperty(process, 'pid', {value: originalFkillPid});
+});
+
+test.serial('don\'t kill `fkill` when killing `node` or `node.exe`', async t => {
+	const result = await execa('node', ['./fixture2.js'], {detached: true});
+	t.is(result.exitCode, 0);
 });
 
 test('ignore ignore-case for pid', async t => {
