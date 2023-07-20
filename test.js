@@ -68,6 +68,13 @@ if (process.platform === 'win32') {
 		// Cleanup
 		await fkill(title);
 	});
+
+	testRequiringNoopProcessToSetTitleProperly()('force', async t => {
+		const pid = await noopProcess({title: 'force'});
+		await fkill('force', {force: true});
+
+		await noopProcessKilled(t, pid);
+	});
 }
 
 test('fail', async t => {
