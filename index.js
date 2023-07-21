@@ -52,20 +52,21 @@ const macosKill = (input, options) => {
 	const command = killByName ? 'pkill' : 'kill';
 	const arguments_ = [input];
 
-	if (options.force) {
-		if (killByName) {
-			arguments_.unshift('-KILL');
-		} else {
-			arguments_.unshift('-9');
-		}
-	}
-
 	if (killByName && options.ignoreCase) {
 		arguments_.unshift('-i');
 	}
 
 	if (killByName) {
 		arguments_.unshift('-x');
+	}
+
+	// Must be last.
+	if (options.force) {
+		if (killByName) {
+			arguments_.unshift('-KILL');
+		} else {
+			arguments_.unshift('-9');
+		}
 	}
 
 	return missingBinaryError(command, arguments_);
