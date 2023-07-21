@@ -60,6 +60,7 @@ const macosKill = (input, options) => {
 		arguments_.unshift('-x');
 	}
 
+	// Must be last.
 	if (options.force) {
 		if (killByName) {
 			arguments_.unshift('-KILL');
