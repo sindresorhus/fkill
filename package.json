@@ -44,7 +44,7 @@
 		"execa": "^5.1.1",
 		"pid-port": "^0.2.0",
 		"process-exists": "^4.1.0",
-		"ps-list": "^7.2.0",
+		"ps-list": "^8.1.1",
 		"taskkill": "^4.0.0"
 	},
 	"devDependencies": {
