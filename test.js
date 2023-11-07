@@ -2,13 +2,11 @@ import process from 'node:process';
 import childProcess from 'node:child_process';
 import test from 'ava';
 import noopProcess from 'noop-process';
-import processExists from 'process-exists';
+import {processExists} from 'process-exists';
 import delay from 'delay';
 import getPort from 'get-port';
-import execa from 'execa';
+import {execa} from 'execa';
 import fkill from './index.js';
-
-const testRequiringNoopProcessToSetTitleProperly = () => (process.versions.node.split('.')[0] === '12') ? test.skip : test;
 
 async function noopProcessKilled(t, pid) {
 	// Ensure the noop process has time to exit.
@@ -23,7 +21,7 @@ test('pid', async t => {
 });
 
 if (process.platform === 'win32') {
-	test.serial('title', async t => {
+	test.serial('title - windows', async t => {
 		const title = 'notepad.exe';
 		const {pid} = childProcess.spawn(title);
 
@@ -32,7 +30,7 @@ if (process.platform === 'win32') {
 		t.false(await processExists(pid));
 	});
 
-	test.serial('win default ignore case', async t => {
+	test.serial('default ignore case - windows', async t => {
 		const title = 'notepad.exe';
 		const {pid} = childProcess.spawn(title);
 
@@ -41,7 +39,7 @@ if (process.platform === 'win32') {
 		t.false(await processExists(pid));
 	});
 } else {
-	testRequiringNoopProcessToSetTitleProperly()('title', async t => {
+	test('title', async t => {
 		const title = 'fkill-test';
 		const pid = await noopProcess({title});
 
@@ -50,14 +48,14 @@ if (process.platform === 'win32') {
 		await noopProcessKilled(t, pid);
 	});
 
-	testRequiringNoopProcessToSetTitleProperly()('ignore case', async t => {
+	test('ignore case', async t => {
 		const pid = await noopProcess({title: 'Capitalized'});
 		await fkill('capitalized', {ignoreCase: true});
 
 		await noopProcessKilled(t, pid);
 	});
 
-	testRequiringNoopProcessToSetTitleProperly()('exact match', async t => {
+	test('exact match', async t => {
 		const title = 'foo-bar';
 		const pid = await noopProcess({title});
 
@@ -69,7 +67,7 @@ if (process.platform === 'win32') {
 		await fkill(title);
 	});
 
-	testRequiringNoopProcessToSetTitleProperly()('force', async t => {
+	test('force', async t => {
 		const pid = await noopProcess({title: 'force'});
 		await fkill('force', {force: true});
 

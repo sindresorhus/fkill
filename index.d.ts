@@ -1,4 +1,4 @@
-export interface Options {
+export type Options = {
 	/**
 	Force kill the processes.
 
@@ -35,7 +35,7 @@ export interface Options {
 	@default false
 	*/
 	readonly silent?: boolean;
-}
+};
 
 /**
 Fabulously kill processes. Cross-platform.

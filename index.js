@@ -1,9 +1,9 @@
 import process from 'node:process';
-import taskkill from 'taskkill';
-import execa from 'execa';
+import {taskkill} from 'taskkill';
+import {execa} from 'execa';
 import AggregateError from 'aggregate-error';
 import {portToPid} from 'pid-port';
-import processExists from 'process-exists';
+import {processExistsMultiple, filterExistingProcesses} from 'process-exists';
 import psList from 'ps-list';
 
 // If we check too soon, we're unlikely to see process killed so we essentially wait 3*ALIVE_CHECK_MIN_INTERVAL before the second check while producing unnecessary load.
@@ -36,7 +36,7 @@ const windowsKill = async (input, options) => {
 	try {
 		return await taskkill(input, {
 			force: options.force,
-			tree: typeof options.tree === 'undefined' ? true : options.tree,
+			tree: options.tree === undefined ? true : options.tree,
 		});
 	} catch (error) {
 		if (error.exitCode === TASKKILL_EXIT_CODE_FOR_PROCESS_FILTERING_SIGTERM && !options.force) {
@@ -144,7 +144,7 @@ const killWithLimits = async (input, options) => {
 export default async function fkill(inputs, options = {}) {
 	inputs = [inputs].flat();
 
-	const exists = await processExists.all(inputs);
+	const exists = await processExistsMultiple(inputs);
 
 	const errors = [];
 
@@ -179,7 +179,7 @@ export default async function fkill(inputs, options = {}) {
 		do {
 			await delay(interval); // eslint-disable-line no-await-in-loop
 
-			alive = await processExists.filterExists(alive); // eslint-disable-line no-await-in-loop
+			alive = await filterExistingProcesses(alive); // eslint-disable-line no-await-in-loop
 
 			interval *= 2;
 			if (interval > ALIVE_CHECK_MAX_INTERVAL) {
