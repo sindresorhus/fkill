@@ -96,6 +96,13 @@ if (process.platform === 'win32') {
 
 		await noopProcessKilled(pid);
 	});
+
+	test('ignore case + force', async () => {
+		const pid = await noopProcess({title: 'IgnoreCaseForce'});
+		await fkill('ignorecaseforce', {ignoreCase: true, force: true});
+
+		await noopProcessKilled(pid);
+	});
 }
 
 test('fail', async () => {
