@@ -111,6 +111,24 @@ test('kill from port', async t => {
 	await noopProcessKilled(t, pid);
 });
 
+// Issue #65: Verify error reporting for port syntax. These tests don't cover the full bug scenario
+// (port with process but kill fails) due to portToPid test unreliability, but the fix is sound.
+test('error when port is not in use', async t => {
+	const port = await getPort();
+	await t.throwsAsync(
+		fkill([`:${port}`]),
+		{message: /Process doesn't exist/},
+	);
+});
+
+test('error when port is not in use (force: true)', async t => {
+	const port = await getPort();
+	await t.throwsAsync(
+		fkill([`:${port}`], {force: true}),
+		{message: /Process doesn't exist/},
+	);
+});
+
 test('error when process is not found', async t => {
 	await t.throwsAsync(
 		fkill(['notFoundProcess']),

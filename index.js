@@ -144,15 +144,29 @@ const killWithLimits = async (input, options) => {
 export default async function fkill(inputs, options = {}) {
 	inputs = [inputs].flat();
 
-	const exists = await processExistsMultiple(inputs);
+	// Parse ports to PIDs upfront for correct existence checking.
+	const parsedInputsMap = new Map(
+		await Promise.all(inputs.map(async input => {
+			try {
+				return [input, await parseInput(input)];
+			} catch {
+				// If parsing fails (e.g., port has no process), keep original input.
+				return [input, input];
+			}
+		})),
+	);
+
+	const exists = await processExistsMultiple([...parsedInputsMap.values()]);
 
 	const errors = [];
 
 	const handleKill = async input => {
+		const parsedInput = parsedInputsMap.get(input);
+
 		try {
 			await killWithLimits(input, options);
 		} catch (error) {
-			if (!exists.get(input)) {
+			if (!exists.get(parsedInput)) {
 				errors.push(`Killing process ${input} failed: Process doesn't exist`);
 				return;
 			}
@@ -174,7 +188,7 @@ export default async function fkill(inputs, options = {}) {
 			interval = options.forceAfterTimeout;
 		}
 
-		let alive = inputs;
+		let alive = [...parsedInputsMap.values()];
 
 		do {
 			await delay(interval); // eslint-disable-line no-await-in-loop
@@ -188,9 +202,9 @@ export default async function fkill(inputs, options = {}) {
 		} while (Date.now() < endTime && alive.length > 0);
 
 		if (alive.length > 0) {
-			await Promise.all(alive.map(async input => {
+			await Promise.all(alive.map(async parsedInput => {
 				try {
-					await killWithLimits(input, {...options, force: true});
+					await killWithLimits(parsedInput, {...options, force: true});
 				} catch {
 					// It's hard to filter does-not-exist kind of errors, so we ignore all of them here.
 					// All meaningful errors should have been thrown before this operation takes place.
