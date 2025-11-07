@@ -218,3 +218,60 @@ test('forceAfterTimeout works properly for process ignoring SIGTERM', async () =
 	await promise;
 	await noopProcessKilled(pid);
 });
+
+test('waitForExit with fast-exiting process', async () => {
+	const pid = await noopProcess();
+	await fkill(pid, {force: true, waitForExit: 2000});
+	assert.strictEqual(await processExists(pid), false);
+});
+
+test('waitForExit with slow-exiting process', async () => {
+	const child = childProcess.spawn(process.execPath, ['fixture-ignore-sigterm.js']);
+	const {pid} = child;
+	await waitForReady(pid);
+	await fkill(pid, {force: true, waitForExit: 1000});
+	assert.strictEqual(await processExists(pid), false);
+});
+
+test('waitForExit timeout expires throws error', async () => {
+	const child = childProcess.spawn(process.execPath, ['fixture-ignore-sigterm.js']);
+	const {pid} = child;
+	await waitForReady(pid);
+	try {
+		await fkill(pid, {waitForExit: 100});
+		assert.fail('Expected error to be thrown');
+	} catch (error) {
+		assert.ok(error instanceof AggregateError);
+		assert.match(error.errors.join(' '), new RegExp(`Process ${pid} did not exit within 100ms`));
+	}
+
+	// Cleanup
+	await fkill(pid, {force: true});
+});
+
+test('waitForExit with silent does not throw on timeout', async () => {
+	const child = childProcess.spawn(process.execPath, ['fixture-ignore-sigterm.js']);
+	const {pid} = child;
+	await waitForReady(pid);
+	await assert.doesNotReject(fkill(pid, {waitForExit: 100, silent: true}));
+	// Cleanup
+	await fkill(pid, {force: true, silent: true});
+});
+
+test('waitForExit: 0 does not wait', async () => {
+	const child = childProcess.spawn(process.execPath, ['fixture-ignore-sigterm.js']);
+	const {pid} = child;
+	await waitForReady(pid);
+	await fkill(pid, {waitForExit: 0});
+	// Process may still be alive since we're not waiting
+	// Cleanup
+	await fkill(pid, {force: true});
+});
+
+test('waitForExit combined with forceAfterTimeout', async () => {
+	const child = childProcess.spawn(process.execPath, ['fixture-ignore-sigterm.js']);
+	const {pid} = child;
+	await waitForReady(pid);
+	await fkill(pid, {forceAfterTimeout: 200, waitForExit: 1000});
+	assert.strictEqual(await processExists(pid), false);
+});

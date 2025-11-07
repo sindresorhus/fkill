@@ -119,6 +119,38 @@ const getCurrentProcessParentsPID = processes => {
 	return pids;
 };
 
+const waitForProcessExit = async (parsedInputsMap, timeout, silent) => {
+	const endTime = Date.now() + timeout;
+	let interval = ALIVE_CHECK_MIN_INTERVAL;
+	if (interval > timeout) {
+		interval = timeout;
+	}
+
+	let alive = [...parsedInputsMap.values()];
+
+	do {
+		await delay(interval); // eslint-disable-line no-await-in-loop
+
+		alive = await filterExistingProcesses(alive); // eslint-disable-line no-await-in-loop
+
+		interval *= 2;
+		if (interval > ALIVE_CHECK_MAX_INTERVAL) {
+			interval = ALIVE_CHECK_MAX_INTERVAL;
+		}
+	} while (Date.now() < endTime && alive.length > 0);
+
+	if (alive.length > 0 && !silent) {
+		const waitErrors = [];
+		for (const parsedInput of alive) {
+			// Find the original input that matches this parsedInput
+			const originalInput = [...parsedInputsMap.entries()].find(([, value]) => value === parsedInput)?.[0] ?? parsedInput;
+			waitErrors.push(`Process ${originalInput} did not exit within ${timeout}ms`);
+		}
+
+		throw new AggregateError(waitErrors, 'Processes did not exit within timeout');
+	}
+};
+
 const killWithLimits = async (input, options) => {
 	input = await parseInput(input);
 
@@ -208,5 +240,9 @@ export default async function fkill(inputs, options = {}) {
 				}
 			}));
 		}
+	}
+
+	if (options.waitForExit !== undefined && options.waitForExit > 0) {
+		await waitForProcessExit(parsedInputsMap, options.waitForExit, options.silent);
 	}
 }
