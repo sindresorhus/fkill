@@ -1,4 +1,5 @@
 import process from 'node:process';
+import path from 'node:path';
 import {taskkill} from 'taskkill';
 import {execa} from 'execa';
 import {portToPid} from 'pid-port';
@@ -12,6 +13,7 @@ const ALIVE_CHECK_MIN_INTERVAL = 5;
 const ALIVE_CHECK_MAX_INTERVAL = 1280;
 
 const TASKKILL_EXIT_CODE_FOR_PROCESS_FILTERING_SIGTERM = 255;
+const DEFAULT_PATHEXT = '.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC';
 
 const delay = ms => new Promise(resolve => {
 	setTimeout(resolve, ms);
@@ -32,18 +34,89 @@ const missingBinaryError = async (command, arguments_) => {
 };
 
 const windowsKill = async (input, options) => {
-	try {
-		return await taskkill(input, {
-			force: options.force,
-			tree: options.tree === undefined ? true : options.tree,
-		});
-	} catch (error) {
-		if (error.exitCode === TASKKILL_EXIT_CODE_FOR_PROCESS_FILTERING_SIGTERM && !options.force) {
-			return;
-		}
+	const killOptions = {
+		force: options.force,
+		tree: options.tree === undefined ? true : options.tree,
+	};
 
-		throw error;
+	const attemptKill = async target => {
+		try {
+			return await taskkill(target, killOptions);
+		} catch (error) {
+			if (error.exitCode === TASKKILL_EXIT_CODE_FOR_PROCESS_FILTERING_SIGTERM && !options.force) {
+				return;
+			}
+
+			throw error;
+		}
+	};
+
+	// If it's a PID, proceed normally
+	if (typeof input === 'number') {
+		return attemptKill(input);
 	}
+
+	// Normalize PATHEXT to uppercase for consistent comparison
+	// Filter out empty entries and trim whitespace to handle malformed PATHEXT
+	const pathext = (process.env.PATHEXT || DEFAULT_PATHEXT)
+		.toUpperCase()
+		.split(';')
+		.map(ext => ext.trim())
+		.filter(Boolean);
+
+	const inputExtension = path.extname(input).toUpperCase();
+
+	// If input has a known executable extension, use it directly
+	if (inputExtension && pathext.includes(inputExtension)) {
+		return attemptKill(input);
+	}
+
+	// Guard against empty input
+	if (!input) {
+		throw new Error('Process name cannot be empty');
+	}
+
+	// No executable extension - try to find the actual process name
+	try {
+		const {stdout} = await execa('tasklist', ['/fo', 'csv', '/nh']);
+		const inputLower = input.toLowerCase();
+
+		// Parse CSV output to get process names
+		const processes = stdout.trim().split('\n')
+			.filter(Boolean)
+			.map(line => {
+				const match = line.match(/^"([^"]+)"/);
+				return match ? {imageName: match[1]} : null;
+			})
+			.filter(Boolean);
+
+		// Find processes matching: input + dot + extension
+		const matches = processes.filter(proc =>
+			proc.imageName.toLowerCase().startsWith(inputLower + '.'));
+
+		if (matches.length > 0) {
+			// Find the best match by PATHEXT priority
+			let bestMatch = matches[0];
+			let bestPriority = pathext.indexOf(path.extname(bestMatch.imageName).toUpperCase());
+
+			for (const proc of matches.slice(1)) {
+				const priority = pathext.indexOf(path.extname(proc.imageName).toUpperCase());
+
+				// Prefer processes with extensions in PATHEXT, prioritized by order
+				if (priority !== -1 && (bestPriority === -1 || priority < bestPriority)) {
+					bestMatch = proc;
+					bestPriority = priority;
+				}
+			}
+
+			return attemptKill(bestMatch.imageName);
+		}
+	} catch {
+		// If tasklist fails, fall through to .exe fallback
+	}
+
+	// Fallback: try with .exe extension
+	return attemptKill(`${input}.exe`);
 };
 
 const macosKill = (input, options) => {

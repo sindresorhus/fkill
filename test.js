@@ -55,6 +55,14 @@ if (process.platform === 'win32') {
 
 		assert.strictEqual(await processExists(pid), false);
 	});
+
+	test('title without extension - windows', async () => {
+		const {pid} = childProcess.spawn('notepad.exe');
+
+		await fkill('notepad', {force: true});
+
+		assert.strictEqual(await processExists(pid), false);
+	});
 } else {
 	test('title', async () => {
 		const title = 'fkill-test';

@@ -44,6 +44,8 @@ One or more process IDs/names/ports to kill.
 
 To kill a port, prefix it with a colon. For example: `:8080`.
 
+On Windows, process extensions are optional. For example, both `fkill('notepad')` and `fkill('notepad.exe')` work.
+
 #### options
 
 Type: `object`
