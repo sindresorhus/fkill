@@ -1,6 +1,10 @@
 import process from 'node:process';
 import childProcess from 'node:child_process';
-import test from 'ava';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
 import noopProcess from 'noop-process';
 import {processExists} from 'process-exists';
 import delay from 'delay';
@@ -8,161 +12,202 @@ import getPort from 'get-port';
 import {execa} from 'execa';
 import fkill from './index.js';
 
-async function noopProcessKilled(t, pid) {
+async function noopProcessKilled(pid) {
 	// Ensure the noop process has time to exit.
 	await delay(100);
-	t.false(await processExists(pid));
+	assert.strictEqual(await processExists(pid), false);
 }
 
-test('pid', async t => {
+async function waitForReady(pid) {
+	const readyFile = path.join(os.tmpdir(), `fkill-ready-${pid}`);
+	const timeout = 2000;
+	const start = Date.now();
+	while (!fs.existsSync(readyFile)) {
+		if (Date.now() - start > timeout) {
+			throw new Error(`Process ${pid} did not become ready within ${timeout}ms`);
+		}
+
+		await delay(10); // eslint-disable-line no-await-in-loop
+	}
+}
+
+test('pid', async () => {
 	const pid = await noopProcess();
 	await fkill(pid, {force: true});
-	await noopProcessKilled(t, pid);
+	await noopProcessKilled(pid);
 });
 
 if (process.platform === 'win32') {
-	test.serial('title - windows', async t => {
+	test('title - windows', async () => {
 		const title = 'notepad.exe';
 		const {pid} = childProcess.spawn(title);
 
 		await fkill(title, {force: true});
 
-		t.false(await processExists(pid));
+		assert.strictEqual(await processExists(pid), false);
 	});
 
-	test.serial('default ignore case - windows', async t => {
+	test('default ignore case - windows', async () => {
 		const title = 'notepad.exe';
 		const {pid} = childProcess.spawn(title);
 
 		await fkill('NOTEPAD.EXE', {force: true});
 
-		t.false(await processExists(pid));
+		assert.strictEqual(await processExists(pid), false);
 	});
 } else {
-	test('title', async t => {
+	test('title', async () => {
 		const title = 'fkill-test';
 		const pid = await noopProcess({title});
 
 		await fkill(title);
 
-		await noopProcessKilled(t, pid);
+		await noopProcessKilled(pid);
 	});
 
-	test('ignore case', async t => {
+	test('ignore case', async () => {
 		const pid = await noopProcess({title: 'Capitalized'});
 		await fkill('capitalized', {ignoreCase: true});
 
-		await noopProcessKilled(t, pid);
+		await noopProcessKilled(pid);
 	});
 
-	test('exact match', async t => {
+	test('exact match', async () => {
 		const title = 'foo-bar';
 		const pid = await noopProcess({title});
 
-		await t.throwsAsync(fkill('foo'), {message: /Process doesn't exist/});
+		try {
+			await fkill('foo');
+			assert.fail('Expected error to be thrown');
+		} catch (error) {
+			assert.ok(error instanceof AggregateError);
+			assert.match(error.errors.join(' '), /Process doesn't exist/);
+		}
 
-		t.true(await processExists(pid));
+		assert.strictEqual(await processExists(pid), true);
 
 		// Cleanup
 		await fkill(title);
 	});
 
-	test('force', async t => {
+	test('force', async () => {
 		const pid = await noopProcess({title: 'force'});
 		await fkill('force', {force: true});
 
-		await noopProcessKilled(t, pid);
+		await noopProcessKilled(pid);
 	});
 }
 
-test('fail', async t => {
-	const error = await t.throwsAsync(fkill(['123456', '654321']));
-	t.regex(error.message, /123456/);
-	t.regex(error.message, /654321/);
+test('fail', async () => {
+	try {
+		await fkill(['123456', '654321']);
+		assert.fail('Expected error to be thrown');
+	} catch (error) {
+		assert.ok(error instanceof AggregateError);
+		const errorString = error.errors.join(' ');
+		assert.match(errorString, /123456/);
+		assert.match(errorString, /654321/);
+	}
 });
 
-test.serial('don\'t kill self', async t => {
+test('don\'t kill self', async () => {
 	const originalFkillPid = process.pid;
 	const pid = await noopProcess();
 	Object.defineProperty(process, 'pid', {value: pid});
 
 	await fkill(process.pid);
 
-	await delay(noopProcessKilled(t, pid));
-	t.true(await processExists(pid));
+	await delay(100);
+	assert.strictEqual(await processExists(pid), true);
 	Object.defineProperty(process, 'pid', {value: originalFkillPid});
 });
 
-test.serial('don\'t kill `fkill` when killing `node` or `node.exe`', async t => {
+test('don\'t kill `fkill` when killing `node` or `node.exe`', async () => {
 	const result = await execa('node', ['./fixture2.js'], {detached: true});
-	t.is(result.exitCode, 0);
+	assert.strictEqual(result.exitCode, 0);
 });
 
-test('ignore ignore-case for pid', async t => {
+test('ignore ignore-case for pid', async () => {
 	const pid = await noopProcess();
 	await fkill(pid, {force: true, ignoreCase: true});
-	await noopProcessKilled(t, pid);
+	await noopProcessKilled(pid);
 });
 
-test('kill from port', async t => {
+test('kill from port', async () => {
 	const port = await getPort();
 	const {pid} = childProcess.spawn(process.execPath, ['fixture.js', port]);
 	await fkill(pid, {force: true});
-	await noopProcessKilled(t, pid);
+	await noopProcessKilled(pid);
 });
 
 // Issue #65: Verify error reporting for port syntax. These tests don't cover the full bug scenario
 // (port with process but kill fails) due to portToPid test unreliability, but the fix is sound.
-test('error when port is not in use', async t => {
+test('error when port is not in use', async () => {
 	const port = await getPort();
-	await t.throwsAsync(
-		fkill([`:${port}`]),
-		{message: /Process doesn't exist/},
-	);
+	try {
+		await fkill([`:${port}`]);
+		assert.fail('Expected error to be thrown');
+	} catch (error) {
+		assert.ok(error instanceof AggregateError);
+		assert.match(error.errors.join(' '), /Process doesn't exist/);
+	}
 });
 
-test('error when port is not in use (force: true)', async t => {
+test('error when port is not in use (force: true)', async () => {
 	const port = await getPort();
-	await t.throwsAsync(
-		fkill([`:${port}`], {force: true}),
-		{message: /Process doesn't exist/},
-	);
+	try {
+		await fkill([`:${port}`], {force: true});
+		assert.fail('Expected error to be thrown');
+	} catch (error) {
+		assert.ok(error instanceof AggregateError);
+		assert.match(error.errors.join(' '), /Process doesn't exist/);
+	}
 });
 
-test('error when process is not found', async t => {
-	await t.throwsAsync(
-		fkill(['notFoundProcess']),
-		{message: /Killing process notFoundProcess failed: Process doesn't exist/},
-	);
+test('error when process is not found', async () => {
+	try {
+		await fkill(['notFoundProcess']);
+		assert.fail('Expected error to be thrown');
+	} catch (error) {
+		assert.ok(error instanceof AggregateError);
+		assert.match(error.errors.join(' '), /Killing process notFoundProcess failed: Process doesn't exist/);
+	}
 });
 
-test('error when process is not found (force: true)', async t => {
-	await t.throwsAsync(
-		fkill(['notFoundProcess'], {force: true}),
-		{message: /Killing process notFoundProcess failed: Process doesn't exist/},
-	);
+test('error when process is not found (force: true)', async () => {
+	try {
+		await fkill(['notFoundProcess'], {force: true});
+		assert.fail('Expected error to be thrown');
+	} catch (error) {
+		assert.ok(error instanceof AggregateError);
+		assert.match(error.errors.join(' '), /Killing process notFoundProcess failed: Process doesn't exist/);
+	}
 });
 
-test('suppress errors when silent', async t => {
-	await t.notThrowsAsync(fkill(['123456', '654321'], {silent: true}));
-	await t.notThrowsAsync(fkill(['notFoundProcess'], {silent: true}));
+test('suppress errors when silent', async () => {
+	await assert.doesNotReject(fkill(['123456', '654321'], {silent: true}));
+	await assert.doesNotReject(fkill(['notFoundProcess'], {silent: true}));
 });
 
-test('force works properly for process ignoring SIGTERM', async t => {
-	const {pid} = childProcess.spawn(process.execPath, ['fixture-ignore-sigterm.js']);
+test('force works properly for process ignoring SIGTERM', async () => {
+	const child = childProcess.spawn(process.execPath, ['fixture-ignore-sigterm.js']);
+	const {pid} = child;
+	await waitForReady(pid);
 	await fkill(pid, {});
 	await delay(100);
-	t.true(await processExists(pid));
+	assert.strictEqual(await processExists(pid), true);
 	await fkill(pid, {force: true});
-	await noopProcessKilled(t, pid);
+	await noopProcessKilled(pid);
 });
 
-test('forceAfterTimeout works properly for process ignoring SIGTERM', async t => {
-	const {pid} = childProcess.spawn(process.execPath, ['fixture-ignore-sigterm.js']);
-	const promise = fkill(pid, {forceAfterTimeout: 100});
-	t.true(await processExists(pid));
+test('forceAfterTimeout works properly for process ignoring SIGTERM', async () => {
+	const child = childProcess.spawn(process.execPath, ['fixture-ignore-sigterm.js']);
+	const {pid} = child;
+	await waitForReady(pid);
+	const promise = fkill(pid, {forceAfterTimeout: 200});
+	assert.strictEqual(await processExists(pid), true);
 	await delay(50);
-	t.true(await processExists(pid));
+	assert.strictEqual(await processExists(pid), true);
 	await promise;
-	await noopProcessKilled(t, pid);
+	await noopProcessKilled(pid);
 });

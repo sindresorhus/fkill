@@ -1,7 +1,6 @@
 import process from 'node:process';
 import {taskkill} from 'taskkill';
 import {execa} from 'execa';
-import AggregateError from 'aggregate-error';
 import {portToPid} from 'pid-port';
 import {processExistsMultiple, filterExistingProcesses} from 'process-exists';
 import psList from 'ps-list';
@@ -145,16 +144,14 @@ export default async function fkill(inputs, options = {}) {
 	inputs = [inputs].flat();
 
 	// Parse ports to PIDs upfront for correct existence checking.
-	const parsedInputsMap = new Map(
-		await Promise.all(inputs.map(async input => {
-			try {
-				return [input, await parseInput(input)];
-			} catch {
-				// If parsing fails (e.g., port has no process), keep original input.
-				return [input, input];
-			}
-		})),
-	);
+	const parsedInputsMap = new Map(await Promise.all(inputs.map(async input => {
+		try {
+			return [input, await parseInput(input)];
+		} catch {
+			// If parsing fails (e.g., port has no process), keep original input.
+			return [input, input];
+		}
+	})));
 
 	const exists = await processExistsMultiple([...parsedInputsMap.values()]);
 
@@ -178,7 +175,7 @@ export default async function fkill(inputs, options = {}) {
 	await Promise.all(inputs.map(input => handleKill(input)));
 
 	if (errors.length > 0 && !options.silent) {
-		throw new AggregateError(errors);
+		throw new AggregateError(errors, 'Failed to kill processes');
 	}
 
 	if (options.forceAfterTimeout !== undefined && !options.force) {
