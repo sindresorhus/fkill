@@ -174,7 +174,7 @@ const kill = (() => {
 
 const parseInput = async input => {
 	if (typeof input === 'string' && input[0] === ':') {
-		return portToPid(Number.parseInt(input.slice(1), 10));
+		return portToPid({port: Number.parseInt(input.slice(1), 10), host: '*'});
 	}
 
 	return input;
