@@ -122,7 +122,9 @@ const windowsKill = async (input, options) => {
 const macosKill = (input, options) => {
 	const killByName = typeof input === 'string';
 	const command = killByName ? 'pkill' : 'kill';
-	const arguments_ = [input];
+
+	// Use '--' to separate options from PID to handle negative PIDs (process groups) correctly.
+	const arguments_ = killByName ? [input] : ['--', input];
 
 	if (killByName && options.ignoreCase) {
 		arguments_.unshift('-i');
@@ -132,7 +134,7 @@ const macosKill = (input, options) => {
 		arguments_.unshift('-x');
 	}
 
-	// Must be last.
+	// Must be first for `kill` command.
 	// Explicit signal is required to handle negative PIDs (process groups) correctly.
 	// Without it, `kill -1234` is ambiguous (could be interpreted as signal 1234).
 	if (options.force) {
@@ -147,7 +149,9 @@ const macosKill = (input, options) => {
 const defaultKill = (input, options) => {
 	const killByName = typeof input === 'string';
 	const command = killByName ? 'killall' : 'kill';
-	const arguments_ = [input];
+
+	// Use '--' to separate options from PID to handle negative PIDs (process groups) correctly.
+	const arguments_ = killByName ? [input] : ['--', input];
 
 	// Explicit signal is required to handle negative PIDs (process groups) correctly.
 	// Without it, `kill -1234` is ambiguous (could be interpreted as signal 1234).
