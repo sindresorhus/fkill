@@ -283,3 +283,23 @@ test('waitForExit combined with forceAfterTimeout', async () => {
 	await fkill(pid, {forceAfterTimeout: 200, waitForExit: 1000});
 	assert.strictEqual(await processExists(pid), false);
 });
+
+if (process.platform !== 'win32') {
+	test('kill process group with negative PID', async () => {
+		// Spawn a detached process - it becomes its own process group leader
+		const child = childProcess.spawn(process.execPath, ['fixture.js', '0'], {
+			detached: true,
+			stdio: 'ignore',
+		});
+		const {pid} = child;
+		child.unref();
+
+		await delay(100);
+		assert.strictEqual(await processExists(pid), true);
+
+		// Kill the process group using negative PID
+		await fkill(-pid, {force: true});
+
+		await noopProcessKilled(pid);
+	});
+}

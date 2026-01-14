@@ -133,12 +133,12 @@ const macosKill = (input, options) => {
 	}
 
 	// Must be last.
+	// Explicit signal is required to handle negative PIDs (process groups) correctly.
+	// Without it, `kill -1234` is ambiguous (could be interpreted as signal 1234).
 	if (options.force) {
-		if (killByName) {
-			arguments_.unshift('-KILL');
-		} else {
-			arguments_.unshift('-9');
-		}
+		arguments_.unshift(killByName ? '-KILL' : '-9');
+	} else {
+		arguments_.unshift(killByName ? '-TERM' : '-15');
 	}
 
 	return missingBinaryError(command, arguments_);
@@ -149,9 +149,9 @@ const defaultKill = (input, options) => {
 	const command = killByName ? 'killall' : 'kill';
 	const arguments_ = [input];
 
-	if (options.force) {
-		arguments_.unshift('-9');
-	}
+	// Explicit signal is required to handle negative PIDs (process groups) correctly.
+	// Without it, `kill -1234` is ambiguous (could be interpreted as signal 1234).
+	arguments_.unshift(options.force ? '-9' : '-15');
 
 	if (killByName && options.ignoreCase) {
 		arguments_.unshift('-I');
