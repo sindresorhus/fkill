@@ -69,7 +69,7 @@ Force kill processes that did not exit within the given number of milliseconds.
 Type: `boolean`\
 Default: `true`
 
-Kill all child processes along with the parent process. *(Windows only)*
+Kill all child processes along with the parent process.
 
 ##### ignoreCase
 
