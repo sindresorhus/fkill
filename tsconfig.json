@@ -1,0 +1,9 @@
+{
+	"compilerOptions": {
+		"strict": true
+	},
+	"include": [
+		"index.d.ts",
+		"index.test-d.ts"
+	]
+}

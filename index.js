@@ -13,6 +13,7 @@ const ALIVE_CHECK_MIN_INTERVAL = 5;
 const ALIVE_CHECK_MAX_INTERVAL = 1280;
 
 const TASKKILL_EXIT_CODE_FOR_PROCESS_FILTERING_SIGTERM = 255;
+const TASKKILL_EXIT_CODE_FOR_PROCESS_NOT_FOUND = 128;
 const DEFAULT_PATHEXT = '.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC';
 
 const delay = ms => new Promise(resolve => {
@@ -43,11 +44,23 @@ const windowsKill = async (input, options) => {
 		try {
 			return await taskkill(target, killOptions);
 		} catch (error) {
-			if (error.exitCode === TASKKILL_EXIT_CODE_FOR_PROCESS_FILTERING_SIGTERM && !options.force) {
+			let taskkillError = error;
+
+			if (taskkillError.exitCode === TASKKILL_EXIT_CODE_FOR_PROCESS_NOT_FOUND) {
+				await delay(50);
+
+				try {
+					return await taskkill(target, killOptions);
+				} catch (retryError) {
+					taskkillError = retryError;
+				}
+			}
+
+			if (taskkillError.exitCode === TASKKILL_EXIT_CODE_FOR_PROCESS_FILTERING_SIGTERM && !options.force) {
 				return;
 			}
 
-			throw error;
+			throw taskkillError;
 		}
 	};
 
@@ -262,9 +275,13 @@ export default async function fkill(inputs, options = {}) {
 		}
 	})));
 
-	const exists = await processExistsMultiple([...parsedInputsMap.values()]);
-
 	const errors = [];
+	let existingProcessesPromise;
+
+	const getExistingProcesses = async () => {
+		existingProcessesPromise ??= processExistsMultiple([...parsedInputsMap.values()]);
+		return existingProcessesPromise;
+	};
 
 	const handleKill = async input => {
 		const parsedInput = parsedInputsMap.get(input);
@@ -272,6 +289,12 @@ export default async function fkill(inputs, options = {}) {
 		try {
 			await killWithLimits(input, options);
 		} catch (error) {
+			if (process.platform === 'win32' && error.exitCode === TASKKILL_EXIT_CODE_FOR_PROCESS_NOT_FOUND) {
+				errors.push(`Killing process ${input} failed: Process doesn't exist`);
+				return;
+			}
+
+			const exists = await getExistingProcesses();
 			if (!exists.get(parsedInput)) {
 				errors.push(`Killing process ${input} failed: Process doesn't exist`);
 				return;
