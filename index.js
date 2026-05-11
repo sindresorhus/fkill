@@ -196,6 +196,60 @@ const getCurrentProcessParentsPID = processes => {
 	return pids;
 };
 
+const getDescendantPids = (processes, pid) => {
+	const childrenByParentPid = new Map();
+
+	for (const process_ of processes) {
+		const children = childrenByParentPid.get(process_.ppid) ?? [];
+		children.push(process_.pid);
+		childrenByParentPid.set(process_.ppid, children);
+	}
+
+	const descendantPids = [];
+	const stack = [...(childrenByParentPid.get(pid) ?? [])];
+
+	while (stack.length > 0) {
+		const descendantPid = stack.pop();
+		descendantPids.push(descendantPid);
+		stack.push(...(childrenByParentPid.get(descendantPid) ?? []));
+	}
+
+	return descendantPids;
+};
+
+const getPidsByProcessName = (processes, processName, options) => {
+	const normalizedProcessName = options.ignoreCase ? processName.toLowerCase() : processName;
+
+	return processes
+		.filter(process_ => {
+			const name = options.ignoreCase ? process_.name.toLowerCase() : process_.name;
+			return name === normalizedProcessName;
+		})
+		.map(process_ => process_.pid);
+};
+
+const killProcessTree = async (input, options) => {
+	if (process.platform === 'win32' || options.tree === false || (typeof input === 'number' && input < 0)) {
+		await kill(input, options);
+		return;
+	}
+
+	const processes = await psList();
+	const protectedPids = getCurrentProcessParentsPID(processes);
+	const targetPids = typeof input === 'number' ? [input] : getPidsByProcessName(processes, input, options);
+	const pids = [...new Set(targetPids.flatMap(pid => [
+		...getDescendantPids(processes, pid),
+		pid,
+	]))].filter(pid => !protectedPids.includes(pid));
+
+	if (pids.length === 0) {
+		await kill(input, options);
+		return;
+	}
+
+	await Promise.all(pids.map(pid => kill(pid, {...options, tree: false})));
+};
+
 const waitForProcessExit = async (parsedInputsMap, timeout, silent) => {
 	const endTime = Date.now() + timeout;
 	let interval = ALIVE_CHECK_MIN_INTERVAL;
@@ -240,13 +294,13 @@ const killWithLimits = async (input, options) => {
 		const pids = getCurrentProcessParentsPID(processes);
 		await Promise.all(processes.map(async ps => {
 			if ((ps.name === 'node' || ps.name === 'node.exe') && !pids.includes(ps.pid)) {
-				await kill(ps.pid, options);
+				await killProcessTree(ps.pid, options);
 			}
 		}));
 		return;
 	}
 
-	await kill(input, options);
+	await killProcessTree(input, options);
 };
 
 export default async function fkill(inputs, options = {}) {

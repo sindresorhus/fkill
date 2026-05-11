@@ -285,6 +285,31 @@ test('waitForExit combined with forceAfterTimeout', async () => {
 });
 
 if (process.platform !== 'win32') {
+	test('kill process tree', async () => {
+		const readyFile = path.join(os.tmpdir(), `fkill-tree-${Date.now()}.json`);
+		const {pid} = childProcess.spawn(process.execPath, ['fixture-tree.js', readyFile], {
+			stdio: 'ignore',
+		});
+		const start = Date.now();
+
+		while (!fs.existsSync(readyFile)) {
+			if (Date.now() - start > 2000) {
+				throw new Error('Process tree fixture did not become ready within 2000ms');
+			}
+
+			await delay(10); // eslint-disable-line no-await-in-loop
+		}
+
+		const {childPid} = JSON.parse(fs.readFileSync(readyFile, 'utf8'));
+
+		await fkill(pid, {force: true, waitForExit: 2000});
+
+		assert.strictEqual(await processExists(pid), false);
+		assert.strictEqual(await processExists(childPid), false);
+
+		fs.rmSync(readyFile, {force: true});
+	});
+
 	test('kill process group with negative PID', async () => {
 		// Spawn a detached process - it becomes its own process group leader
 		const child = childProcess.spawn(process.execPath, ['fixture.js', '0'], {

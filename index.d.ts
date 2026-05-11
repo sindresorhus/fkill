@@ -14,7 +14,7 @@ export type Options = {
 	readonly forceAfterTimeout?: number;
 
 	/**
-	Kill all child processes along with the parent process. _(Windows only)_
+	Kill all child processes along with the parent process.
 
 	@default true
 	*/
